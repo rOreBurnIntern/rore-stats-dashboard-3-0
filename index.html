@@ -122,24 +122,23 @@
     </div>
 
     <script>
-        const GIST_URL = 'https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json?raw=1&t=' + Date.now();
+        const API_EXPLORE = 'https://api.rore.supply/api/explore';
+        const API_PRICES = 'https://api.rore.supply/api/prices';
         
         async function fetchData() {
             try {
-                const response = await fetch(GIST_URL);
-                const data = await response.json();
+                // Fetch from rORE API directly
+                const [exploreRes, pricesRes] = await Promise.all([
+                    fetch(API_EXPLORE).catch(() => null),
+                    fetch(API_PRICES).catch(() => null)
+                ]);
                 
-                // Convert stored format to expected format
-                const explore = {
-                    roundsData: data.rounds || [], // Keep oldest first for charts
-                    protocolStats: {
-                        motherlode: data.motherlode || '0'
-                    }
-                };
+                const explore = exploreRes ? await exploreRes.json() : null;
+                const prices = pricesRes ? await pricesRes.json() : null;
                 
-                return { explore, prices: data.prices };
+                return { explore, prices };
             } catch(e) {
-                console.error('Failed to load from Gist:', e);
+                console.error('Failed to load from API:', e);
                 return { explore: null, prices: null };
             }
         }

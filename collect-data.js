@@ -7,7 +7,7 @@ const API_PRICES = 'https://api.rore.supply/api/prices';
 
 function fetchJSON(url, includeAuth = false) {
   return new Promise((resolve, reject) => {
-    const headers = {};
+    const headers = { 'User-Agent': 'rORE-Stats/1.0' };
     if (includeAuth && GITHUB_TOKEN) {
       headers['Authorization'] = `token ${GITHUB_TOKEN}`;
       headers['Accept'] = 'application/vnd.github+json';
@@ -89,9 +89,10 @@ async function main() {
   };
   
   // Update Gist
+  const contentStr = JSON.stringify(dataToSave, null, 2);
   const updateData = JSON.stringify({
     files: {
-      'rore-data.json': { content: JSON.stringify(dataToSave) }
+      'rore-data.json': { content: contentStr }
     }
   });
   
@@ -103,7 +104,8 @@ async function main() {
       headers: {
         'Authorization': `token ${GITHUB_TOKEN}`,
         'Content-Type': 'application/json',
-        'Content-Length': updateData.length
+        'Content-Length': Buffer.byteLength(updateData),
+        'User-Agent': 'rORE-Stats/1.0'
       }
     };
     
