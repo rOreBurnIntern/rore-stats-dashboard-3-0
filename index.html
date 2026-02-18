@@ -122,20 +122,26 @@
     </div>
 
     <script>
-        const API_EXPLORE = 'https://api.rore.supply/api/explore';
-        const API_PRICES = 'https://api.rore.supply/api/prices';
-        const CORS_PROXY = 'https://corsproxy.io/?';
+        const GIST_URL = 'https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json';
         
         async function fetchData() {
-            const [exploreRes, pricesRes] = await Promise.all([
-                fetch(CORS_PROXY + encodeURIComponent(API_EXPLORE)).catch(() => null),
-                fetch(CORS_PROXY + encodeURIComponent(API_PRICES)).catch(() => null)
-            ]);
-            
-            const explore = exploreRes ? await exploreRes.json() : null;
-            const prices = pricesRes ? await pricesRes.json() : null;
-            
-            return { explore, prices };
+            try {
+                const response = await fetch(GIST_URL);
+                const data = await response.json();
+                
+                // Convert stored format to expected format
+                const explore = {
+                    roundsData: (data.rounds || []).reverse(), // Reverse to get newest first
+                    protocolStats: {
+                        motherlode: data.motherlode || '0'
+                    }
+                };
+                
+                return { explore, prices: data.prices };
+            } catch(e) {
+                console.error('Failed to load from Gist:', e);
+                return { explore: null, prices: null };
+            }
         }
         
         function analyzeRounds(roundsData) {
