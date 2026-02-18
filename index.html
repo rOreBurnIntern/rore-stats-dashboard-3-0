@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rORE Stats Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #1a1a2e; 
+            color: #eee; 
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 10px; color: #f0a500; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .chart-card { 
+            background: #16213e; 
+            border-radius: 12px; 
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .chart-card h2 { 
+            margin-bottom: 15px; 
+            font-size: 1.1rem;
+            color: #f0a500;
+        }
+        .chart-container { position: relative; height: 300px; }
+        .stats { 
+            background: #16213e; 
+            border-radius: 12px; 
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+        }
+        .stat-item { 
+            background: #1a1a2e; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #f0a500; }
+        .stat-label { color: #888; margin-top: 5px; }
+        .loading { text-align: center; padding: 50px; color: #888; }
+        .error { text-align: center; padding: 50px; color: #ff6b6b; }
+        .note { 
+            text-align: center; 
+            color: #888; 
+            font-size: 0.9rem; 
+            margin-top: 20px; 
+            padding: 15px;
+            background: #16213e;
+            border-radius: 8px;
+        }
+        a { color: #f0a500; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 rORE Stats Dashboard</h1>
+        <p class="subtitle">Live statistics from the rORE mining game</p>
+        
+        <div id="loading" class="loading">Loading data...</div>
+        <div id="error" class="error" style="display:none;"></div>
+        
+        <div id="content" style="display:none;">
+            <div class="stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalRounds">-</div>
+                        <div class="stat-label">Rounds Analyzed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="motherlode">-</div>
+                        <div class="stat-label">Current Motherlode (rORE)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="wethPrice">-</div>
+                        <div class="stat-label">WETH Price (USD)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="orePrice">-</div>
+                        <div class="stat-label">rORE Price (USD)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts">
+                <div class="chart-card">
+                    <h2>🎯 Split vs Winner-Take-All (Last 24h)</h2>
+                    <div class="chart-container">
+                        <canvas id="wtaChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h2>🎲 Winning Block Frequency (Last 24h)</h2>
+                    <div class="chart-container">
+                        <canvas id="blockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h2>💎 Motherlode Over Time</h2>
+                <div class="chart-container">
+                    <canvas id="motherlodeChart"></canvas>
+                </div>
+            </div>
+            
+            <p class="note">
+                Note: API returns limited historical data (~1-2 hours). For full 24h/week analysis, <br>
+                the rORE protocol would need to store historical data on-chain or via an indexer.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const API_EXPLORE = 'https://api.rore.supply/api/explore';
+        const API_PRICES = 'https://api.rore.supply/api/prices';
+        
+        async function fetchData() {
+            const [exploreRes, pricesRes] = await Promise.all([
+                fetch(API_EXPLORE).catch(() => null),
+                fetch(API_PRICES).catch(() => null)
+            ]);
+            
+            const explore = exploreRes ? await exploreRes.json() : null;
+            const prices = pricesRes ? await pricesRes.json() : null;
+            
+            return { explore, prices };
+        }
+        
+        function analyzeRounds(roundsData) {
+            if (!roundsData || roundsData.length === 0) return null;
+            
+            const rounds = roundsData.reverse(); // Oldest first for charts
+            
+            // Split vs WTA
+            const split = rounds.filter(r => !r.winnerTakeAll).length;
+            const wta = rounds.filter(r => r.winnerTakeAll).length;
+            
+            // Block frequency
+            const blockCounts = {};
+            for (let i = 1; i <= 25; i++) blockCounts[i] = 0;
+            rounds.forEach(r => {
+                const block = parseInt(r.block.replace('#', ''));
+                if (blockCounts[block] !== undefined) blockCounts[block]++;
+            });
+            
+            return { split, wta, blockCounts, rounds };
+        }
+        
+        function renderCharts(data, prices, motherlode) {
+            // WTA Pie Chart
+            new Chart(document.getElementById('wtaChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Split', 'Winner-Take-All'],
+                    datasets: [{
+                        data: [data.split, data.wta],
+                        backgroundColor: ['#4ecca3', '#f0a500']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#eee' } }
+                    }
+                }
+            });
+            
+            // Block Frequency Bar Chart
+            new Chart(document.getElementById('blockChart'), {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: 25}, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Wins',
+                        data: Object.values(data.blockCounts),
+                        backgroundColor: '#f0a500'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#888' }, grid: { color: '#333' } },
+                        y: { ticks: { color: '#888' }, grid: { color: '#333' }, beginAtZero: true }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            
+            // Motherlode Line Chart
+            const mlData = data.rounds.map((r, i) => ({ x: i, y: r.motherlodeHit ? 0.2 : 0 }));
+            new Chart(document.getElementById('motherlodeChart'), {
+                type: 'line',
+                data: {
+                    labels: data.rounds.map(r => r.round),
+                    datasets: [{
+                        label: 'Motherlode (rORE)',
+                        data: data.rounds.map((r, i) => {
+                            // Motherlode increases by 0.2 each round if not hit
+                            const roundsSinceStart = i;
+                            const hits = data.rounds.slice(0, i+1).filter(r => r.motherlodeHit).length;
+                            return (roundsSinceStart * 0.2) - (hits * 0.2);
+                        }),
+                        borderColor: '#4ecca3',
+                        backgroundColor: 'rgba(78, 204, 163, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#888' }, grid: { color: '#333' } },
+                        y: { ticks: { color: '#888' }, grid: { color: '#333' }, beginAtZero: true }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        async function init() {
+            try {
+                const { explore, prices } = await fetchData();
+                
+                if (!explore || !explore.roundsData) {
+                    document.getElementById('error').textContent = 'Failed to load rORE data';
+                    document.getElementById('error').style.display = 'block';
+                    return;
+                }
+                
+                const motherlodeWei = explore.protocolStats?.motherlode || '0';
+                const motherlode = Number(BigInt(motherlodeWei) / BigInt(1e18));
+                
+                const data = analyzeRounds(explore.roundsData);
+                if (!data) throw new Error('No round data');
+                
+                // Update stats
+                document.getElementById('totalRounds').textContent = data.rounds.length;
+                document.getElementById('motherlode').textContent = motherlode.toFixed(1);
+                document.getElementById('wethPrice').textContent = prices ? `$${prices.weth.toFixed(2)}` : '-';
+                document.getElementById('orePrice').textContent = prices ? `$${prices.ore.toFixed(2)}` : '-';
+                
+                renderCharts(data, prices, motherlode);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } catch (e) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').textContent = 'Error: ' + e.message;
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
