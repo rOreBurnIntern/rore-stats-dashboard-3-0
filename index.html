@@ -131,7 +131,7 @@
                 
                 // Convert stored format to expected format
                 const explore = {
-                    roundsData: (data.rounds || []).reverse(), // Reverse to get newest first
+                    roundsData: data.rounds || [], // Keep oldest first for charts
                     protocolStats: {
                         motherlode: data.motherlode || '0'
                     }
