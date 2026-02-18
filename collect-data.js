@@ -108,9 +108,15 @@ async function main() {
     stored = { rounds: [], lastUpdated: null };
   }
   
-  // Merge new rounds (avoid duplicates)
+  // Get current motherlode value
+  const currentMotherlodeWei = explore.protocolStats?.motherlode || '0';
+  const currentMotherlodeRore = Number(BigInt(currentMotherlodeWei) / BigInt(1e18));
+  
+  // Merge new rounds (avoid duplicates), adding current motherlode to each
   const existingIds = new Set((stored.rounds || []).map(r => r.roundId));
-  const newRounds = explore.roundsData.filter(r => !existingIds.has(r.roundId));
+  const newRounds = explore.roundsData
+    .filter(r => !existingIds.has(r.roundId))
+    .map(r => ({ ...r, motherlodeValue: currentMotherlodeRore }));
   
   if (newRounds.length > 0) {
     console.log(`Adding ${newRounds.length} new rounds`);

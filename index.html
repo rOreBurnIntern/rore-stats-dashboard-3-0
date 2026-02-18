@@ -206,18 +206,8 @@
                 }
             });
             
-            // Motherlode Line Chart
-            // Calculate motherlode value for each round (0.2 added per round if not hit)
-            const motherlodeValues = [];
-            let runningMotherlode = 0;
-            for (let i = 0; i < data.rounds.length; i++) {
-                if (data.rounds[i].motherlodeHit) {
-                    runningMotherlode = 0; // Reset on hit
-                } else {
-                    runningMotherlode += 0.2; // Add 0.2 each round
-                }
-                motherlodeValues.push(runningMotherlode);
-            }
+            // Motherlode Line Chart - use actual stored values
+            const motherlodeValues = data.rounds.map(r => r.motherlodeValue || 0);
             
             new Chart(document.getElementById('motherlodeChart'), {
                 type: 'line',
