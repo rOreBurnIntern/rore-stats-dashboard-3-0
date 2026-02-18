@@ -122,12 +122,12 @@
     </div>
 
     <script>
-        const API_EXPLORE = 'https://api.rore.supply/api/explore';
-        const API_PRICES = 'https://api.rore.supply/api/prices';
+        const API_EXPLORE = 'https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/explore');
+        const API_PRICES = 'https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/prices');
         
         async function fetchData() {
             try {
-                // Fetch from rORE API directly
+                // Fetch from rORE API via CORS proxy
                 const [exploreRes, pricesRes] = await Promise.all([
                     fetch(API_EXPLORE).catch(() => null),
                     fetch(API_PRICES).catch(() => null)
