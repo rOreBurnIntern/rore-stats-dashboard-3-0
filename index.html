@@ -226,7 +226,12 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { ticks: { color: '#888' }, grid: { color: '#333' } },
-                        y: { ticks: { color: '#888' }, grid: { color: '#333' }, beginAtZero: true }
+                        y: { 
+                            ticks: { color: '#888' }, 
+                            grid: { color: '#333' },
+                            suggestedMin: Math.min(...motherlodeValues.filter(v => v > 0)) - 5,
+                            suggestedMax: Math.max(...motherlodeValues) + 5
+                        }
                     },
                     plugins: { legend: { display: false } }
                 }
