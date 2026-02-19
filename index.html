@@ -235,8 +235,13 @@
                 }
             });
             
-            // Motherlode Line Chart - use actual stored values
-            const motherlodeValues = data.rounds.map(r => r.motherlodeValue || 0);
+            // Motherlode Line Chart - calculate backwards from current
+            const currentML = parseFloat(motherlode.toFixed(1));
+            const mlValues = [];
+            for (let i = data.rounds.length - 1; i >= 0; i--) {
+                mlValues.push(currentML - (i * 0.2));
+            }
+            mlValues.reverse(); // Put back in chronological order
             
             new Chart(document.getElementById('motherlodeChart'), {
                 type: 'line',
@@ -244,7 +249,7 @@
                     labels: data.rounds.map(r => r.round),
                     datasets: [{
                         label: 'Motherlode (rORE)',
-                        data: motherlodeValues,
+                        data: mlValues,
                         borderColor: '#4ecca3',
                         backgroundColor: 'rgba(78, 204, 163, 0.2)',
                         fill: true,
