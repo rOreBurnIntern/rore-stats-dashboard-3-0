@@ -175,7 +175,8 @@
         function analyzeRounds(roundsData) {
             if (!roundsData || roundsData.length === 0) return null;
             
-            const rounds = roundsData.reverse(); // Oldest first for charts
+            // Keep newest first (right side of chart) - no reverse
+            const rounds = roundsData;
             
             // Split vs WTA
             const split = rounds.filter(r => !r.winnerTakeAll).length;
