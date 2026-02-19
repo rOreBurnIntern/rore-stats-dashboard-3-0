@@ -122,23 +122,52 @@
     </div>
 
     <script>
-        const API_EXPLORE = 'https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/explore');
-        const API_PRICES = 'https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/prices');
+        // Use Gist for historical data (accumulated over time)
+        const GIST_DATA_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json');
         
         async function fetchData() {
             try {
-                // Fetch from rORE API via CORS proxy
+                // Fetch current data from API
                 const [exploreRes, pricesRes] = await Promise.all([
-                    fetch(API_EXPLORE).catch(() => null),
-                    fetch(API_PRICES).catch(() => null)
+                    fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/explore')).catch(() => null),
+                    fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/prices')).catch(() => null)
                 ]);
                 
                 const explore = exploreRes ? await exploreRes.json() : null;
                 const prices = pricesRes ? await pricesRes.json() : null;
                 
-                return { explore, prices };
+                // Also fetch historical data from Gist
+                let gistData = null;
+                try {
+                    const gistRes = await fetch(GIST_DATA_URL);
+                    gistData = gistRes ? await gistRes.json() : null;
+                } catch(e) {
+                    console.log('Gist fetch failed, using API data only');
+                }
+                
+                // Use Gist rounds if available, otherwise use API rounds
+                const roundsData = (gistData && gistData.rounds && gistData.rounds.length > 0) 
+                    ? gistData.rounds 
+                    : (explore?.roundsData || []);
+                
+                // Get current motherlode from API
+                const motherlodeWei = explore?.protocolStats?.motherlode || '0';
+                const motherlode = Number(BigInt(motherlodeWei) / BigInt(1e18));
+                
+                // Add current motherlode to rounds that don't have it
+                const roundsWithMotherlode = roundsData.map(r => ({
+                    ...r,
+                    motherlodeValue: r.motherlodeValue || motherlode
+                }));
+                
+                const exploreWithHistory = {
+                    roundsData: roundsWithMotherlode,
+                    protocolStats: { motherlode: motherlodeWei }
+                };
+                
+                return { explore: exploreWithHistory, prices };
             } catch(e) {
-                console.error('Failed to load from API:', e);
+                console.error('Failed to load data:', e);
                 return { explore: null, prices: null };
             }
         }
@@ -251,13 +280,7 @@
                 const motherlodeWei = explore.protocolStats?.motherlode || '0';
                 const motherlode = Number(BigInt(motherlodeWei) / BigInt(1e18));
                 
-                // Add current motherlode value to each round
-                const roundsWithMotherlode = explore.roundsData.map(r => ({
-                    ...r,
-                    motherlodeValue: motherlode
-                }));
-                
-                const data = analyzeRounds(roundsWithMotherlode);
+                const data = analyzeRounds(explore.roundsData);
                 if (!data) throw new Error('No round data');
                 
                 // Update stats
