@@ -122,24 +122,22 @@
     </div>
 
     <script>
-        // Use Gist for historical data (accumulated over time)
-        const GIST_DATA_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json') + '&t=' + Date.now();
+        // Use Gist for historical data (accumulated over time) - use allorigins proxy
+        const GIST_DATA_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json');
         
         async function fetchData() {
             try {
-                // Fetch current data from API
-                const [exploreRes, pricesRes] = await Promise.all([
-                    fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/explore')).catch(() => null),
-                    fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.rore.supply/api/prices')).catch(() => null)
+                // Fetch current data from API via allorigins proxy
+                const [exploreRes, pricesRes, gistRes] = await Promise.all([
+                    fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.rore.supply/api/explore')).catch(() => null),
+                    fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.rore.supply/api/prices')).catch(() => null),
+                    fetch(GIST_DATA_URL).catch(() => null)
                 ]);
                 
                 const explore = exploreRes ? await exploreRes.json() : null;
                 const prices = pricesRes ? await pricesRes.json() : null;
-                
-                // Also fetch historical data from Gist
                 let gistData = null;
                 try {
-                    const gistRes = await fetch(GIST_DATA_URL);
                     gistData = gistRes ? await gistRes.json() : null;
                 } catch(e) {
                     console.log('Gist fetch failed, using API data only');
