@@ -122,25 +122,30 @@
     </div>
 
     <script>
-        // Use Gist for historical data (accumulated over time) - use allorigins proxy
-        const GIST_DATA_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json');
+        // Use Gist for historical data - direct fetch (should support CORS)
+        const GIST_DATA_URL = 'https://gist.githubusercontent.com/rOreBurnIntern/7484dddd3ac2cc66475ac6779bf35ef5/raw/rore-data.json';
         
         async function fetchData() {
             try {
-                // Fetch current data from API via allorigins proxy
-                const [exploreRes, pricesRes, gistRes] = await Promise.all([
-                    fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.rore.supply/api/explore')).catch(() => null),
-                    fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.rore.supply/api/prices')).catch(() => null),
-                    fetch(GIST_DATA_URL).catch(() => null)
-                ]);
+                // Fetch current data from rORE API (CORS might block, will fallback to gist only)
+                let explore = null;
+                let prices = null;
+                try {
+                    const exploreRes = await fetch('https://api.rore.supply/api/explore');
+                    const pricesRes = await fetch('https://api.rore.supply/api/prices');
+                    explore = exploreRes.ok ? await exploreRes.json() : null;
+                    prices = pricesRes.ok ? await pricesRes.json() : null;
+                } catch(e) {
+                    console.log('API fetch failed, using Gist only');
+                }
                 
-                const explore = exploreRes ? await exploreRes.json() : null;
-                const prices = pricesRes ? await pricesRes.json() : null;
+                // Fetch historical data from Gist
                 let gistData = null;
                 try {
-                    gistData = gistRes ? await gistRes.json() : null;
+                    const gistRes = await fetch(GIST_DATA_URL);
+                    gistData = gistRes.ok ? await gistRes.json() : null;
                 } catch(e) {
-                    console.log('Gist fetch failed, using API data only');
+                    console.log('Gist fetch failed:', e);
                 }
                 
                 // Use Gist rounds if available, otherwise use API rounds
@@ -148,8 +153,11 @@
                     ? gistData.rounds 
                     : (explore?.roundsData || []);
                 
-                // Get current motherlode from API
-                const motherlodeWei = explore?.protocolStats?.motherlode || '0';
+                // Use prices from API, fallback to Gist
+                const finalPrices = prices || gistData?.prices || null;
+                
+                // Get current motherlode from API, fallback to Gist
+                const motherlodeWei = explore?.protocolStats?.motherlode || gistData?.motherlode || '0';
                 const motherlode = Number(BigInt(motherlodeWei) / BigInt(1e18));
                 
                 // Add current motherlode to rounds that don't have it
@@ -163,7 +171,7 @@
                     protocolStats: { motherlode: motherlodeWei }
                 };
                 
-                return { explore: exploreWithHistory, prices };
+                return { explore: exploreWithHistory, prices: finalPrices };
             } catch(e) {
                 console.error('Failed to load data:', e);
                 return { explore: null, prices: null };
