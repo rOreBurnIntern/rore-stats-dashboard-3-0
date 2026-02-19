@@ -153,6 +153,10 @@
                     ? gistData.rounds 
                     : (explore?.roundsData || []);
                 
+                console.log('Rounds from Gist:', gistData?.rounds?.length);
+                console.log('Rounds from API:', explore?.roundsData?.length);
+                console.log('Total roundsData:', roundsData.length);
+                
                 // Use prices from API, fallback to Gist
                 const finalPrices = prices || gistData?.prices || null;
                 
