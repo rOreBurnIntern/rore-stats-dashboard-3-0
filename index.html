@@ -251,7 +251,13 @@
                 const motherlodeWei = explore.protocolStats?.motherlode || '0';
                 const motherlode = Number(BigInt(motherlodeWei) / BigInt(1e18));
                 
-                const data = analyzeRounds(explore.roundsData);
+                // Add current motherlode value to each round
+                const roundsWithMotherlode = explore.roundsData.map(r => ({
+                    ...r,
+                    motherlodeValue: motherlode
+                }));
+                
+                const data = analyzeRounds(roundsWithMotherlode);
                 if (!data) throw new Error('No round data');
                 
                 // Update stats
