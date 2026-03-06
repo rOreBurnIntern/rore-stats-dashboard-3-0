@@ -1,0 +1,147 @@
+:root {
+  --bg: #070707;
+  --panel: #111111;
+  --panel-border: #2b2b2b;
+  --text: #f4f4f4;
+  --muted: #9f9f9f;
+  --fire-primary: #ff6b00;
+  --fire-secondary: #ff3d00;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background:
+    radial-gradient(1200px 400px at 20% 0%, rgba(255, 107, 0, 0.16), transparent 60%),
+    radial-gradient(900px 500px at 80% 0%, rgba(255, 61, 0, 0.1), transparent 62%),
+    var(--bg);
+  color: var(--text);
+}
+
+.skip-link {
+  position: absolute;
+  top: -44px;
+  left: 8px;
+  background: var(--fire-primary);
+  color: #111;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+.page-header,
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.5vw, 2.3rem);
+}
+
+h2 {
+  margin: 8px 0 12px;
+}
+
+.source,
+#last-updated {
+  margin: 4px 0;
+  color: var(--muted);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255, 107, 0, 0.03), transparent 30%), var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.chart-card {
+  min-height: 320px;
+}
+
+.chart-wide {
+  grid-column: span 2;
+  min-height: 340px;
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  color: #ffd4c0;
+}
+
+.card p {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--fire-primary);
+}
+
+.state {
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: #0f0f0f;
+  color: var(--text);
+}
+
+#error {
+  border-color: var(--fire-secondary);
+  color: #ffc5b5;
+}
+
+.hidden {
+  display: none;
+}
+
+canvas {
+  width: 100% !important;
+  height: 250px !important;
+}
+
+.chart-wide canvas {
+  height: 300px !important;
+}
+
+a:focus,
+button:focus,
+[tabindex]:focus {
+  outline: 2px solid var(--fire-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-wide {
+    grid-column: span 1;
+  }
+}

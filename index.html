@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rORE Stats V4</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="page-header">
+      <h1>rORE Stats V4</h1>
+      <p id="last-updated">Last updated: --</p>
+      <p class="source">Source: api.rore.supply (via /api/stats)</p>
+    </header>
+    <main id="main" class="layout">
+      <section aria-labelledby="stats-heading">
+        <h2 id="stats-heading">Protocol Stats</h2>
+        <div class="stats-grid">
+          <article class="card">
+            <h3>Motherlode</h3>
+            <p id="motherlode-value">--</p>
+          </article>
+          <article class="card">
+            <h3>WETH</h3>
+            <p id="weth-value">--</p>
+          </article>
+          <article class="card">
+            <h3>rORE</h3>
+            <p id="rore-value">--</p>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="charts-heading">
+        <h2 id="charts-heading">Round Analytics</h2>
+        <div id="loading" class="state">Loading stats...</div>
+        <div id="error" class="state hidden" role="alert"></div>
+        <div id="empty" class="state hidden">No round data available.</div>
+
+        <div id="charts" class="chart-grid hidden">
+          <article class="card chart-card">
+            <h3>Winner Type Distribution</h3>
+            <canvas id="pie-chart" aria-label="Winner type distribution pie chart"></canvas>
+          </article>
+          <article class="card chart-card">
+            <h3>Wins Per Block (1-25)</h3>
+            <canvas id="bar-chart" aria-label="Wins per block bar chart"></canvas>
+          </article>
+          <article class="card chart-wide">
+            <h3>Motherlode Running Value</h3>
+            <canvas id="line-chart" aria-label="Motherlode history line chart"></canvas>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "rore-stats-v4",
+  "version": "0.1.0",
+  "description": "rORE Stats V4 dashboard",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo \"No build step required\"",
+    "start": "vercel dev",
+    "test": "node --test",
+    "lint": "node --check api/stats.js lib/stats.js app.js tests/stats.test.js tests/api.test.js"
+  },
+  "keywords": [
+    "rore",
+    "stats",
+    "vercel"
+  ],
+  "author": "rOreBurnIntern",
+  "license": "ISC",
+  "type": "commonjs",
+  "private": true
+}
