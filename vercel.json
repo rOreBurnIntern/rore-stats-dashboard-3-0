@@ -1,8 +1,3 @@
 {
-  "version": 2,
-  "functions": {
-    "api/stats.js": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "outputDirectory": "."
 }
