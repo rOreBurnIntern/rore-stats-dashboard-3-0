@@ -1,9 +1,9 @@
 const { buildStatsPayload, extractRoundArray, parsePagination } = require("../lib/stats");
 
 const UPSTREAM_BASE = "https://api.rore.supply";
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 25000;
 const RETRIES = 2;
-const MAX_PAGES = 200;
+const MAX_PAGES = 15;
 
 async function fetchJsonWithRetry(url, options = {}) {
   const fetchImpl = options.fetchImpl || fetch;
