@@ -72,52 +72,16 @@ async function refreshFromUpstream(db, options = {}) {
 }
 
 module.exports = async function handler(req, res) {
-  let db = null;
   try {
-    db = openDatabase();
-  } catch (err) {
-    // SQLite not available (e.g., Vercel serverless) - use upstream API
-  }
-  
-  try {
-    if (!db) {
-      // No database - use upstream API directly
-      const prices = await fetchJsonWithRetry(`${UPSTREAM_BASE}/api/prices`, { timeoutMs: 25000 });
-      const explorePages = await fetchExplorePages({ maxPages: 15, timeoutMs: 25000 });
-      const data = buildStatsPayload(prices, explorePages);
-      jsonResponse(res, 200, {
-        ok: true,
-        source: "upstream",
-        pagesFetched: explorePages.length,
-        data
-      });
-      return;
-    }
-    
-    const state = getSyncState(db);
-    const isFresh = Boolean(state && state.lastSyncMs && (Date.now() - state.lastSyncMs) <= MAX_CACHE_AGE_MS);
-
-    if (isFresh && hasCachedRounds(db)) {
-      const data = buildPayloadFromCache(state, db);
-      jsonResponse(res, 200, {
-        ok: true,
-        source: "sqlite-cache",
-        pagesFetched: 0,
-        cacheHit: true,
-        lastUpdated: new Date(state.lastSyncMs).toISOString(),
-        data
-      });
-      return;
-    }
-
-    const refreshed = await refreshFromUpstream(db);
+    // Use upstream API directly (SQLite doesn't work in serverless)
+    const prices = await fetchJsonWithRetry(`${UPSTREAM_BASE}/api/prices`, { timeoutMs: 25000 });
+    const explorePages = await fetchExplorePages({ maxPages: 15, timeoutMs: 25000 });
+    const data = buildStatsPayload(prices, explorePages);
     jsonResponse(res, 200, {
       ok: true,
-      source: "api.rore.supply",
-      pagesFetched: refreshed.pagesFetched,
-      cacheHit: false,
-      lastUpdated: new Date(refreshed.lastSyncMs).toISOString(),
-      data: refreshed.data
+      source: "upstream",
+      pagesFetched: explorePages.length,
+      data
     });
   } catch (error) {
     console.error("[/api/stats] upstream fetch failed", {
@@ -128,8 +92,6 @@ module.exports = async function handler(req, res) {
       error: "Upstream data unavailable",
       detail: error && error.message ? error.message : "Unknown error"
     });
-  } finally {
-    closeDatabase(db);
   }
 };
 
