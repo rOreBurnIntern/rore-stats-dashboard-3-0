@@ -90,12 +90,35 @@ function readThemeColors() {
   };
 }
 
+function withAlpha(color, alpha) {
+  const nextAlpha = Math.max(0, Math.min(1, alpha));
+  const rgbMatch = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (rgbMatch) {
+    return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${nextAlpha})`;
+  }
+
+  const hex = color.replace("#", "").trim();
+  if (/^[0-9a-f]{6}$/i.test(hex)) {
+    const r = Number.parseInt(hex.slice(0, 2), 16);
+    const g = Number.parseInt(hex.slice(2, 4), 16);
+    const b = Number.parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${nextAlpha})`;
+  }
+
+  return color;
+}
+
 function sharedOptions() {
   const colors = readThemeColors();
   return {
     plugins: {
       legend: {
-        labels: { color: colors.text }
+        labels: {
+          color: colors.text,
+          font: {
+            size: 12
+          }
+        }
       },
       tooltip: {
         backgroundColor: colors.tooltipBg,
@@ -107,12 +130,27 @@ function sharedOptions() {
     },
     scales: {
       x: {
-        ticks: { color: colors.text },
-        grid: { color: colors.grid }
+        ticks: {
+          color: colors.text,
+          font: {
+            size: 11
+          },
+          maxRotation: 0
+        },
+        grid: {
+          color: colors.grid
+        }
       },
       y: {
-        ticks: { color: colors.text },
-        grid: { color: colors.grid }
+        ticks: {
+          color: colors.text,
+          font: {
+            size: 11
+          }
+        },
+        grid: {
+          color: colors.grid
+        }
       }
     }
   };
@@ -285,6 +323,7 @@ function filterRounds(rounds, range) {
 function renderCharts(data) {
   destroyCharts();
   const colors = readThemeColors();
+  const baseOptions = sharedOptions();
 
   chartInstances.pie = new Chart(document.getElementById("pie-chart"), {
     type: "doughnut",
@@ -376,14 +415,18 @@ function renderCharts(data) {
           backgroundColor: colors.accent,
           borderColor: colors.accentStrong,
           borderWidth: 1,
-          borderRadius: 6
+          borderRadius: 8,
+          borderSkipped: false,
+          barPercentage: 0.72,
+          categoryPercentage: 0.62,
+          maxBarThickness: 24
         }
       ]
     },
     options: {
-      ...sharedOptions(),
+      ...baseOptions,
       plugins: {
-        ...sharedOptions().plugins,
+        ...baseOptions.plugins,
         legend: { display: false }
       }
     }
@@ -398,7 +441,19 @@ function renderCharts(data) {
           label: "Motherlode Running Value",
           data: data.line.map((point) => point.motherlodeValue),
           borderColor: colors.accent,
-          backgroundColor: `${colors.accent}33`,
+          borderWidth: 2,
+          backgroundColor(context) {
+            const { chart } = context;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) {
+              return withAlpha(colors.accent, 0.15);
+            }
+
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, withAlpha(colors.accent, 0.22));
+            gradient.addColorStop(1, withAlpha(colors.accent, 0.04));
+            return gradient;
+          },
           fill: true,
           tension: 0.22,
           pointRadius: 0
@@ -406,7 +461,24 @@ function renderCharts(data) {
       ]
     },
     options: {
-      ...sharedOptions()
+      ...baseOptions,
+      scales: {
+        ...baseOptions.scales,
+        x: {
+          ...baseOptions.scales.x,
+          grid: {
+            color: withAlpha(colors.grid, 0.08),
+            lineWidth: 0.8
+          }
+        },
+        y: {
+          ...baseOptions.scales.y,
+          grid: {
+            color: withAlpha(colors.grid, 0.08),
+            lineWidth: 0.8
+          }
+        }
+      }
     }
   });
 }
