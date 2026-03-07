@@ -209,6 +209,10 @@ body {
 }
 
 .chart-card {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+
   padding: 14px;
   min-height: 280px;
 }
@@ -218,6 +222,10 @@ body {
 }
 
 .chart-canvas {
+  flex: 1;
+  width: 100% !important;
+  max-height: 260px;
+
   display: block;
   width: 100% !important;
   min-height: 240px;
