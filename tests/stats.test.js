@@ -2,16 +2,16 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildStatsPayload, filterRoundsLast24Hours, motherlodeHistory, winsPerBlock } = require("../lib/stats");
 
-test("winsPerBlock always returns 25 bins including zeros", () => {
+test("winsPerBlock always returns 26 bins including zeros", () => {
   const bins = winsPerBlock([
-    { winnerBlock: 1 },
-    { winnerBlock: 1 },
+    { winnerBlock: 0 },
+    { winnerBlock: 0 },
     { winnerBlock: 25 }
   ]);
 
-  assert.equal(bins.length, 25);
+  assert.equal(bins.length, 26);
   assert.equal(bins[0].wins, 2);
-  assert.equal(bins[24].wins, 1);
+  assert.equal(bins[25].wins, 1);
   assert.equal(bins[13].wins, 0);
 });
 
@@ -110,6 +110,21 @@ test("buildStatsPayload uses roundId for line x labels and parses #block values"
     payload.line.map((point) => point.x),
     ["27421", "27422"]
   );
-  assert.equal(payload.bar[3].wins, 1);
-  assert.equal(payload.bar[7].wins, 1);
+  assert.equal(payload.bar[4].wins, 1);
+  assert.equal(payload.bar[8].wins, 1);
+});
+
+test("buildStatsPayload pie distribution honors winnerTakeAll boolean", () => {
+  const nowIso = new Date().toISOString();
+  const payload = buildStatsPayload({}, [
+    {
+      rounds: [
+        { id: "1", winnerTakeAll: true, endTimestamp: nowIso, timestamp: nowIso },
+        { id: "2", winnerTakeAll: false, endTimestamp: nowIso, timestamp: nowIso }
+      ]
+    }
+  ]);
+
+  assert.equal(payload.pie.winnerTakeAll, 1);
+  assert.equal(payload.pie.split, 1);
 });

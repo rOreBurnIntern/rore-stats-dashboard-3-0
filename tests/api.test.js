@@ -105,7 +105,7 @@ test("stats handler returns normalized payload with cache headers", async () => 
     assert.equal(res.body.ok, true);
     assert.equal(res.body.data.roundsProcessed, 2);
     assert.equal(res.body.data.stats.motherlode, 4.2);
-    assert.equal(res.body.data.bar.length, 25);
+    assert.equal(res.body.data.bar.length, 26);
     assert.match(res.headers["cache-control"], /s-maxage=30/);
   } finally {
     global.fetch = previousFetch;
