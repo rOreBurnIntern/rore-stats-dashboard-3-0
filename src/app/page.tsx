@@ -18,7 +18,7 @@ interface StatsData {
     wethPrice: string;
     rorePrice: string;
     motherlode: string;
-    lastUpdate: string;
+    lastUpdate?: string;
   };
   pie: {
     winnerTakeAll: number;
@@ -27,6 +27,7 @@ interface StatsData {
   bar: Array<{ block: number; wins: number }>;
   line: LinePoint[];
   source: string;
+  lastUpdate?: string;
 }
 
 const RANGE_MS: Record<Range, number | null> = {
@@ -36,6 +37,13 @@ const RANGE_MS: Record<Range, number | null> = {
 };
 
 const THEME_KEY = 'rore-theme';
+
+function formatLastUpdated(lastUpdated?: string): string {
+  if (!lastUpdated) return 'N/A';
+  const parsed = new Date(lastUpdated);
+  if (Number.isNaN(parsed.getTime())) return 'N/A';
+  return parsed.toLocaleString();
+}
 
 export default function Home() {
   const [data, setData] = useState<StatsData | null>(null);
@@ -98,9 +106,8 @@ export default function Home() {
   const rore = Number.parseFloat(data?.prices?.rorePrice ?? '0');
   const weth = Number.parseFloat(data?.prices?.wethPrice ?? '0');
   const roreUsd = rore * weth;
-  const lastUpdate = data?.prices?.lastUpdate
-    ? new Date(data.prices.lastUpdate).toLocaleString()
-    : 'N/A';
+  const rawLastUpdated = data?.prices?.lastUpdate ?? data?.lastUpdate;
+  const lastUpdate = formatLastUpdated(rawLastUpdated);
 
   return (
     <main data-theme={theme} className="min-h-screen bg-base-200">
@@ -109,15 +116,33 @@ export default function Home() {
           <div className="card-body p-6 md:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h1 className="text-4xl font-bold leading-tight md:text-6xl bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+                <h1 className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-4xl font-bold leading-tight text-transparent md:text-6xl">
                   rORE Stats
                 </h1>
                 <p className="mt-3 text-base md:text-lg text-base-content/70">
-                  Last updated: {lastUpdate}
+                  Last updated:{' '}
+                  <time dateTime={rawLastUpdated ?? ''} suppressHydrationWarning>
+                    {lastUpdate}
+                  </time>
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center justify-start gap-3 lg:justify-end">
+                <button
+                  type="button"
+                  className="btn btn-primary btn-md rounded-2xl"
+                  onClick={() => setTheme(theme === 'light' ? 'night' : 'light')}
+                  aria-label="Toggle theme"
+                  title="Toggle light/night theme"
+                >
+                  <span className="text-lg" aria-hidden="true">
+                    {theme === 'night' ? '☀️' : '🌙'}
+                  </span>
+                  <span className="text-sm md:text-base font-semibold">
+                    {theme === 'night' ? 'Light' : 'Night'}
+                  </span>
+                </button>
+
                 <div className="join">
                   {(['24h', '7d', 'all'] as Range[]).map((currentRange) => (
                     <button
@@ -133,20 +158,6 @@ export default function Home() {
                   ))}
                 </div>
 
-                <button
-                  type="button"
-                  className="btn btn-md rounded-2xl"
-                  onClick={() => setTheme(theme === 'light' ? 'night' : 'light')}
-                  aria-label="Toggle theme"
-                  title="Toggle light/night theme"
-                >
-                  <span className="text-lg" aria-hidden="true">
-                    {theme === 'night' ? '☀️' : '🌙'}
-                  </span>
-                  <span className="text-sm md:text-base font-semibold">
-                    {theme === 'night' ? 'Light' : 'Night'}
-                  </span>
-                </button>
               </div>
             </div>
           </div>
@@ -183,7 +194,7 @@ export default function Home() {
             <div className="card-body p-6">
               <h2 className="text-lg md:text-xl font-semibold text-base-content/80 flex items-center gap-2">
                 <span aria-hidden="true">Ξ</span>
-                WETH Price
+                WETH
               </h2>
               <p className="text-4xl md:text-5xl font-bold leading-none mt-2">
                 ${weth.toLocaleString('en-US', { minimumFractionDigits: 2 })}
