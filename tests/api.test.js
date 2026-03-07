@@ -1,10 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const os = require("node:os");
-const path = require("node:path");
 const handler = require("../api/stats");
-const { getSyncState, openDatabase } = require("../lib/sqlite");
 
 function createMockResponse() {
   return {
@@ -21,26 +17,6 @@ function createMockResponse() {
     json(payload) {
       this.body = payload;
       return this;
-    }
-  };
-}
-
-function withTempDb(testFn) {
-  return async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "rore-stats-"));
-    const dbPath = path.join(dir, "rore.db");
-    const previousDbPath = process.env.RORE_DB_PATH;
-    process.env.RORE_DB_PATH = dbPath;
-
-    try {
-      await testFn(dbPath);
-    } finally {
-      if (previousDbPath === undefined) {
-        delete process.env.RORE_DB_PATH;
-      } else {
-        process.env.RORE_DB_PATH = previousDbPath;
-      }
-      fs.rmSync(dir, { recursive: true, force: true });
     }
   };
 }
@@ -68,7 +44,7 @@ test("fetchJsonWithRetry retries and returns parsed body", async () => {
   assert.deepEqual(body, { ok: true });
 });
 
-test("stats handler refreshes from upstream and stores sync state", withTempDb(async () => {
+test("stats handler returns upstream data with normalized rounds", async () => {
   const responses = new Map([
     [
       "https://api.rore.supply/api/prices",
@@ -84,7 +60,7 @@ test("stats handler refreshes from upstream and stores sync state", withTempDb(a
             winnerType: "split",
             block: "#2",
             motherlodeHit: false,
-            timestamp: "2026-01-01T00:00:00Z"
+            endTimestamp: "2026-01-01T00:00:00Z"
           }
         ],
         pagination: { hasNext: false }
@@ -110,67 +86,36 @@ test("stats handler refreshes from upstream and stores sync state", withTempDb(a
 
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.ok, true);
-    assert.equal(res.body.cacheHit, false);
-    assert.equal(res.body.source, "api.rore.supply");
+    assert.equal(res.body.source, "upstream");
     assert.equal(res.body.data.roundsProcessed, 1);
+    assert.equal(res.body.data.rounds.length, 1);
+    assert.equal(res.body.data.rounds[0].winnerTakeAll, false);
     assert.match(res.headers["cache-control"], /s-maxage=300/);
-
-    const db = openDatabase();
-    try {
-      const state = getSyncState(db);
-      assert.ok(state);
-      assert.equal(state.prices.weth, "2010.45");
-    } finally {
-      db.close();
-    }
+    assert.ok(res.body.lastUpdated);
   } finally {
     global.fetch = previousFetch;
   }
-}));
+});
 
-test("stats handler returns cached data when sync state is fresh", withTempDb(async () => {
-  const seededResponses = new Map([
-    [
-      "https://api.rore.supply/api/prices",
-      { weth: "2010.45", ore: "0.1234" }
-    ],
-    [
-      "https://api.rore.supply/api/explore?page=1",
-      {
-        protocolStats: { motherlode: "4200000000000000000" },
-        rounds: [
-          {
-            roundId: 202,
-            winnerType: "winner take all",
-            block: "#9",
-            motherlodeHit: true,
-            timestamp: "2026-01-01T00:01:00Z"
-          }
-        ],
-        pagination: { hasNext: false }
-      }
-    ]
-  ]);
-
+test("stats handler falls back to Supabase payload when upstream fails", async () => {
   const previousFetch = global.fetch;
-  global.fetch = async (url) => {
-    if (!seededResponses.has(url)) {
-      return { ok: false, status: 404, json: async () => ({}) };
-    }
-    return {
-      ok: true,
-      status: 200,
-      json: async () => seededResponses.get(url)
-    };
-  };
+  const previousFallback = handler.getFallbackStats;
 
-  await handler({}, createMockResponse());
-
-  let calls = 0;
   global.fetch = async () => {
-    calls += 1;
-    throw new Error("should not call upstream on cache hit");
+    throw new Error("upstream unavailable");
   };
+
+  handler.getFallbackStats = async () => ({
+    lastUpdated: "2026-03-07T10:00:00.000Z",
+    rounds: [{ id: "1", winnerTakeAll: true, winnerBlock: 2, motherlodeHit: false, endTimestamp: "2026-03-07T09:00:00.000Z" }],
+    data: {
+      stats: { motherlode: null, weth: null, rore: null },
+      roundsProcessed: 1,
+      pie: { winnerTakeAll: 1, split: 0 },
+      bar: Array.from({ length: 26 }, (_, block) => ({ block, wins: 0 })),
+      line: [{ x: "1", motherlodeValue: 0.2 }]
+    }
+  });
 
   try {
     const res = createMockResponse();
@@ -178,10 +123,33 @@ test("stats handler returns cached data when sync state is fresh", withTempDb(as
 
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.ok, true);
-    assert.equal(res.body.cacheHit, true);
-    assert.equal(res.body.source, "sqlite-cache");
-    assert.equal(calls, 0);
+    assert.equal(res.body.source, "supabase-fallback");
+    assert.equal(res.body.data.rounds.length, 1);
+    assert.equal(res.body.lastUpdated, "2026-03-07T10:00:00.000Z");
   } finally {
     global.fetch = previousFetch;
+    handler.getFallbackStats = previousFallback;
   }
-}));
+});
+
+test("stats handler returns 502 when upstream and fallback both fail", async () => {
+  const previousFetch = global.fetch;
+  const previousFallback = handler.getFallbackStats;
+
+  global.fetch = async () => {
+    throw new Error("upstream unavailable");
+  };
+  handler.getFallbackStats = async () => null;
+
+  try {
+    const res = createMockResponse();
+    await handler({}, res);
+
+    assert.equal(res.statusCode, 502);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, "Upstream data unavailable");
+  } finally {
+    global.fetch = previousFetch;
+    handler.getFallbackStats = previousFallback;
+  }
+});
