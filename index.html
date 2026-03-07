@@ -6,10 +6,7 @@
     <title>rORE Stats</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
     <script src="/app.js" defer></script>
@@ -17,38 +14,38 @@
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="page-header shell">
-      <div>
-        <h1 class="dashboard-title">rORE Stats</h1>
-        <p id="last-updated">Last updated: --</p>
-        <p class="source" id="source-label">Source: --</p>
+    <header class="header">
+      <div class="header-left">
+        <h1 class="title">rORE Stats</h1>
+        <p id="last-updated" class="meta">Last updated: --</p>
+        <p id="source-label" class="meta source">Source: --</p>
       </div>
-      <button id="theme-toggle" class="toggle" type="button" aria-label="Toggle color theme">Dark mode</button>
+      <button id="theme-toggle" class="btn" type="button" aria-label="Toggle color theme">Dark mode</button>
     </header>
 
-    <main id="main" class="layout shell">
-      <section aria-labelledby="stats-heading" class="section">
-        <h2 id="stats-heading" class="section-title">Protocol Stats</h2>
+    <main id="main" class="container">
+      <section class="section">
+        <h2 class="section-title">Protocol Stats</h2>
         <div class="stats-grid">
-          <article class="card stat-card">
+          <article class="stat-card">
             <h3>Motherlode</h3>
             <p id="motherlode-value">--</p>
           </article>
-          <article class="card stat-card">
+          <article class="stat-card">
             <h3>WETH</h3>
             <p id="weth-value">--</p>
           </article>
-          <article class="card stat-card">
+          <article class="stat-card">
             <h3>rORE</h3>
             <p id="rore-value">--</p>
           </article>
         </div>
       </section>
 
-      <section aria-labelledby="charts-heading" class="section">
-        <div class="section-head">
-          <h2 id="charts-heading" class="section-title">Round Analytics</h2>
-          <div class="filters" role="group" aria-label="Time range filters">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Round Analytics</h2>
+          <div class="filters">
             <button type="button" class="filter-btn active" data-range="24h">24H</button>
             <button type="button" class="filter-btn" data-range="7d">7D</button>
             <button type="button" class="filter-btn" data-range="all">ALL</button>
@@ -59,18 +56,24 @@
         <div id="error" class="state hidden" role="alert"></div>
         <div id="empty" class="state hidden">No round data available for this range.</div>
 
-        <div id="charts" class="chart-grid hidden">
-          <article class="card chart-card">
+        <div id="charts" class="charts-grid hidden">
+          <article class="chart-card">
             <h3>Winner Type Distribution</h3>
-            <canvas id="pie-chart" class="chart-canvas chart-canvas--pie" aria-label="Winner type distribution pie chart"></canvas>
+            <div class="chart-wrap">
+              <canvas id="pie-chart" aria-label="Winner type distribution pie chart"></canvas>
+            </div>
           </article>
-          <article class="card chart-card">
-            <h3>Wins Per Block (0-24)</h3>
-            <canvas id="bar-chart" class="chart-canvas" aria-label="Wins per block bar chart"></canvas>
+          <article class="chart-card">
+            <h3>Wins Per Block (1-25)</h3>
+            <div class="chart-wrap">
+              <canvas id="bar-chart" aria-label="Wins per block bar chart"></canvas>
+            </div>
           </article>
-          <article class="card chart-card chart-wide">
+          <article class="chart-card chart-wide">
             <h3>Motherlode Running Value</h3>
-            <canvas id="line-chart" class="chart-canvas chart-canvas--wide" aria-label="Motherlode history line chart"></canvas>
+            <div class="chart-wrap">
+              <canvas id="line-chart" aria-label="Motherlode history line chart"></canvas>
+            </div>
           </article>
         </div>
       </section>
