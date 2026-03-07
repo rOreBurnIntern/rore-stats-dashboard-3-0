@@ -114,7 +114,7 @@ function renderCharts(data) {
   chartInstances.bar = new Chart(document.getElementById("bar-chart"), {
     type: "bar",
     data: {
-      labels: data.bar.map((item) => String(item.block)),
+      labels: data.bar.map((item) => String(item.block + 1)),
       datasets: [
         {
           label: "Wins",
