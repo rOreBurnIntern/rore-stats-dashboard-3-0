@@ -23,5 +23,10 @@
     "@supabase/supabase-js": "^2.98.0",
     "better-sqlite3": "^11.9.1",
     "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1"
   }
 }
