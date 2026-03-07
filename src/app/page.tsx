@@ -68,11 +68,9 @@ export default function Home() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-base-100 p-4 md:p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center h-64">
-            <span className="loading loading-spinner loading-lg"></span>
-          </div>
+      <main data-theme={theme} className="min-h-screen bg-base-200">
+        <div className="flex items-center justify-center h-screen">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       </main>
     );
@@ -84,22 +82,23 @@ export default function Home() {
   const roreUsd = rore * weth;
 
   return (
-    <main className="min-h-screen bg-base-100 p-4 md:p-8">
+    <main data-theme={theme} className="min-h-screen bg-base-200 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
+        
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
-              rORE Stats
+            <h1 className="text-4xl md:text-5xl font-bold text-base-content">
+              rORE <span className="text-primary">Stats</span>
             </h1>
-            <p className="text-sm opacity-70 mt-1">
+            <p className="text-base-content/60 mt-2 flex items-center gap-2">
               Last updated: {data?.prices?.lastUpdate ? new Date(data.prices.lastUpdate).toLocaleString() : 'N/A'}
-              {data?.source === 'supabase' && <span className="ml-2 badge badge-warning badge-sm">Fallback</span>}
+              {data?.source === 'supabase' && <span className="badge badge-warning badge-sm">Cache</span>}
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
-            <div className="join">
+          <div className="flex items-center gap-3">
+            <div className="join shadow-sm">
               {(['24h', '7d', 'all'] as Range[]).map((r) => (
                 <button
                   key={r}
@@ -110,43 +109,52 @@ export default function Home() {
                 </button>
               ))}
             </div>
-            <button
-              className="btn btn-sm btn-ghost"
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
-            </button>
+            <label className="swap swap-rotate btn btn-ghost btn-circle">
+              <input 
+                type="checkbox" 
+                checked={theme === 'dark'}
+                onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              />
+              <svg className="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+              </svg>
+              <svg className="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+              </svg>
+            </label>
           </div>
         </header>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="card bg-base-200 shadow-sm">
-            <div className="card-body p-4">
-              <h2 className="card-title text-sm opacity-70">Motherlode</h2>
-              <p className="text-3xl font-bold text-primary">{motherlode.toFixed(2)} rORE</p>
+          <div className="card bg-base-100 shadow-lg">
+            <div className="card-body">
+              <h2 className="card-title text-base-content/60 text-sm">Motherlode</h2>
+              <p className="text-4xl font-bold text-primary">{motherlode.toFixed(2)}</p>
+              <p className="text-base-content/40 text-sm">rORE</p>
             </div>
           </div>
-          <div className="card bg-base-200 shadow-sm">
-            <div className="card-body p-4">
-              <h2 className="card-title text-sm opacity-70">rORE Price</h2>
-              <p className="text-3xl font-bold">${rore.toFixed(3)}</p>
-              <p className="text-sm opacity-70">≈ ${roreUsd.toFixed(2)} USD</p>
+          <div className="card bg-base-100 shadow-lg">
+            <div className="card-body">
+              <h2 className="card-title text-base-content/60 text-sm">rORE Price</h2>
+              <p className="text-4xl font-bold">${rore.toFixed(3)}</p>
+              <p className="text-base-content/40 text-sm">≈ ${roreUsd.toFixed(2)} USD</p>
             </div>
           </div>
-          <div className="card bg-base-200 shadow-sm">
-            <div className="card-body p-4">
-              <h2 className="card-title text-sm opacity-70">WETH Price</h2>
-              <p className="text-3xl font-bold">${weth.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <div className="card bg-base-100 shadow-lg">
+            <div className="card-body">
+              <h2 className="card-title text-base-content/60 text-sm">WETH Price</h2>
+              <p className="text-4xl font-bold">${weth.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              <p className="text-base-content/40 text-sm">USD</p>
             </div>
           </div>
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="card bg-base-200 shadow-sm lg:col-span-1">
-            <div className="card-body p-4">
-              <h2 className="card-title text-sm">Winner Type Distribution</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="card bg-base-100 shadow-lg">
+            <div className="card-body">
+              <h2 className="card-title text-base-content/80 text-sm">Winner Type</h2>
               <WinnerPieChart 
                 winnerTakeAll={data?.pie?.winnerTakeAll ?? 0} 
                 split={data?.pie?.split ?? 0} 
@@ -154,16 +162,16 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="card bg-base-200 shadow-sm lg:col-span-2">
-            <div className="card-body p-4">
-              <h2 className="card-title text-sm">Wins by Block</h2>
+          <div className="card bg-base-100 shadow-lg md:col-span-2">
+            <div className="card-body">
+              <h2 className="card-title text-base-content/80 text-sm">Wins by Block</h2>
               <WinsBarChart data={data?.bar ?? []} />
             </div>
           </div>
           
-          <div className="card bg-base-200 shadow-sm md:col-span-2 lg:col-span-3">
-            <div className="card-body p-4">
-              <h2 className="card-title text-sm">Motherlode History</h2>
+          <div className="card bg-base-100 shadow-lg md:col-span-2 lg:col-span-3">
+            <div className="card-body">
+              <h2 className="card-title text-base-content/80 text-sm">Motherlode History</h2>
               <MotherlodeLineChart data={filterByRange(data?.line ?? [])} />
             </div>
           </div>
