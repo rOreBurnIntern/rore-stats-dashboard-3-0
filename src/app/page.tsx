@@ -7,11 +7,16 @@ import { MotherlodeLineChart } from '@/components/charts/LineChart';
 
 type Range = '24h' | '7d' | 'all';
 
+interface LinePoint {
+  timestamp: number;
+  motherlode: number;
+}
+
 interface StatsData {
   prices: { wethPrice: string; rorePrice: string; motherlode: string; lastUpdate: string };
   pie: { winnerTakeAll: number; split: number };
   bar: Array<{ block: number; wins: number }>;
-  line: Array<{ timestamp: number; motherlode: number }>;
+  line: LinePoint[];
   source: string;
 }
 
@@ -55,7 +60,7 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const filterByRange = (lineData: Array<{timestamp: number; motherlode: number}) => {
+  const filterByRange = (lineData: LinePoint[]): LinePoint[] => {
     if (!lineData || range === 'all') return lineData;
     const cutoff = Date.now() - RANGE_MS[range]!;
     return lineData.filter(d => d.timestamp >= cutoff);
