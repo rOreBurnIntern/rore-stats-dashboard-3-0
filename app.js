@@ -111,6 +111,11 @@ function withAlpha(color, alpha) {
 function sharedOptions() {
   const colors = readThemeColors();
   return {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 0
+    },
     plugins: {
       legend: {
         labels: {
@@ -287,7 +292,7 @@ function enforceChartLayoutOrder() {
 
 function buildDerivedData(rounds) {
   const pie = { winnerTakeAll: 0, split: 0 };
-  const bar = Array.from({ length: 26 }, (_, block) => ({ block, wins: 0 }));
+  const bar = Array.from({ length: 25 }, (_, block) => ({ block, wins: 0 }));
 
   const sortedRounds = rounds.slice().sort((a, b) => {
     const aMs = toTimestampMs(a.endTimestamp);
@@ -305,7 +310,7 @@ function buildDerivedData(rounds) {
       pie.split += 1;
     }
 
-    if (Number.isInteger(round.winnerBlock) && round.winnerBlock >= 0 && round.winnerBlock < 26) {
+    if (Number.isInteger(round.winnerBlock) && round.winnerBlock >= 0 && round.winnerBlock < 25) {
       bar[round.winnerBlock].wins += 1;
     }
   }
@@ -349,8 +354,23 @@ function renderCharts(data) {
   destroyCharts();
   const colors = readThemeColors();
   const baseOptions = sharedOptions();
+  const pieCanvas = document.getElementById("pie-chart");
+  const barCanvas = document.getElementById("bar-chart");
 
-  chartInstances.pie = new Chart(document.getElementById("pie-chart"), {
+  // Keep pie and bar canvases visually identical in height.
+  [pieCanvas, barCanvas].forEach((canvas) => {
+    if (canvas) {
+      canvas.style.height = "240px";
+      canvas.style.minHeight = "240px";
+    }
+  });
+
+  const barTitle = barCanvas?.closest("article")?.querySelector("h3");
+  if (barTitle) {
+    barTitle.textContent = "Wins Per Block (1-25)";
+  }
+
+  chartInstances.pie = new Chart(pieCanvas, {
     type: "doughnut",
     data: {
       labels: ["Winner Take All", "Split"],
@@ -369,6 +389,8 @@ function renderCharts(data) {
       ]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       cutout: "64%",
       animation: {
         animateRotate: true,
@@ -431,10 +453,10 @@ function renderCharts(data) {
     plugins: [pieDepthPlugin, piePercentageLabelsPlugin]
   });
 
-  chartInstances.bar = new Chart(document.getElementById("bar-chart"), {
+  chartInstances.bar = new Chart(barCanvas, {
     type: "bar",
     data: {
-      labels: data.bar.map((item) => String(item.block)),
+      labels: data.bar.map((item) => String(item.block + 1)),
       datasets: [
         {
           label: "Wins",
@@ -452,6 +474,9 @@ function renderCharts(data) {
     },
     options: {
       ...baseOptions,
+      layout: {
+        padding: 0
+      },
       plugins: {
         ...baseOptions.plugins,
         legend: { display: false }
