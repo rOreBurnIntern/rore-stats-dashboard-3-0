@@ -7,7 +7,8 @@
     "build": "echo \"No build step required\"",
     "start": "vercel dev",
     "test": "node --test",
-    "lint": "node --check api/stats.js lib/stats.js app.js tests/stats.test.js tests/api.test.js"
+    "lint": "node --check api/stats.js lib/stats.js lib/upstream.js lib/sqlite.js sync.js app.js tests/stats.test.js tests/api.test.js tests/sync.test.js",
+    "sync": "node sync.js"
   },
   "keywords": [
     "rore",
@@ -17,5 +18,8 @@
   "author": "rOreBurnIntern",
   "license": "ISC",
   "type": "commonjs",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "better-sqlite3": "^11.9.1"
+  }
 }
