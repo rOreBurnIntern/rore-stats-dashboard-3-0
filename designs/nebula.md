@@ -1,0 +1,92 @@
+# PURPLE NEBULA — DESIGN.md
+
+## 1. Theme Name
+PURPLE NEBULA
+
+## 2. Color Palette
+- Background (page): `#1a0a2e`
+- Background (surface/card): `#2a1246`
+- Text (primary): `#f5edff`
+- Text (secondary): `#c8b3e6`
+- Accent 1 (violet): `#a855f7`
+- Accent 2 (pink): `#ec4899`
+- Border/divider: `#4a2a73`
+- Chart line 1: `#a855f7`
+- Chart line 2: `#ec4899`
+- Chart line 3: `#c084fc`
+- Chart grid: `#56327f`
+
+## 3. Layout Description
+- Top hero section spans full width with oversized motherlode number and short performance summary.
+- Below hero, charts are arranged in a horizontal row (carousel/scroll row on smaller screens).
+- Secondary metrics sit under charts in compact chips for quick scanning.
+- Desktop emphasizes cinematic first impression; mobile keeps hero first, then swipeable charts.
+
+## 4. Key CSS Changes Needed
+```css
+:root {
+  --bg: #1a0a2e;
+  --surface: #2a1246;
+  --text: #f5edff;
+  --text-muted: #c8b3e6;
+  --accent-violet: #a855f7;
+  --accent-pink: #ec4899;
+  --border: #4a2a73;
+  --chart-grid: #56327f;
+}
+
+body {
+  background:
+    radial-gradient(circle at 15% 10%, #3d1d66 0%, transparent 40%),
+    radial-gradient(circle at 85% 0%, #521f6e 0%, transparent 35%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Sora", "Segoe UI", sans-serif;
+}
+
+.hero {
+  background: linear-gradient(135deg, #36145b 0%, #24103f 65%);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px;
+  margin-bottom: 18px;
+}
+
+.hero .motherlode-value {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1;
+  color: var(--accent-pink);
+  text-shadow: 0 0 18px rgba(236, 72, 153, 0.35);
+}
+
+.chart-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(320px, 1fr);
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.chart-card {
+  scroll-snap-align: start;
+  background: rgba(42, 18, 70, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.metric-chip {
+  background: #2f1550;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.metric-chip strong { color: var(--accent-violet); }
+```
+
+## 5. Optional Additional Chart Features
+- Add neon gradient line strokes (`#a855f7 -> #ec4899`) for primary chart series.
+- Add chart annotations for major burn events with pink callout tags.
+- Use subtle animated starfield canvas in hero background at low opacity.

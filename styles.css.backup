@@ -4,8 +4,8 @@
   --panel-border: #2b2b2b;
   --text: #f4f4f4;
   --muted: #9f9f9f;
-  --fire-primary: #00d4ff;
-  --fire-secondary: #00ff9d;
+  --fire-primary: #ff6b00;
+  --fire-secondary: #ff3d00;
 }
 
 * {

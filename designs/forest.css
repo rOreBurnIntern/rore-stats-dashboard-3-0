@@ -1,0 +1,64 @@
+:root {
+  --bg: #0a1a0a;
+  --surface: #102b14;
+  --text: #ecfdf3;
+  --text-muted: #9cc9ac;
+  --accent-emerald: #10b981;
+  --accent-mint: #34d399;
+  --border: #1f4f2a;
+  --chart-grid: #244f30;
+}
+
+body {
+  background:
+    radial-gradient(circle at 80% -20%, #1e4d2a 0%, transparent 40%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.dashboard {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 20px;
+}
+
+.stat-card,
+.chart-card {
+  background: linear-gradient(160deg, #12331a 0%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kpi-positive {
+  color: var(--accent-mint);
+}
+
+button.primary {
+  background: var(--accent-emerald);
+  color: #03220f;
+}
+
+@media (max-width: 1024px) {
+  .stats-row,
+  .charts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .stats-row,
+  .charts-grid { grid-template-columns: 1fr; }
+}
