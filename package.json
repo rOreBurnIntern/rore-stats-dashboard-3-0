@@ -1,34 +1,28 @@
 {
-  "name": "rore-stats",
+  "name": "rore-stats-next",
   "version": "0.1.0",
-  "description": "rORE Stats V4 dashboard",
-  "scripts": {
-    "dev": "vercel dev",
-    "build": "echo \"No build step required\"",
-    "start": "vercel dev",
-    "test": "node --test",
-    "lint": "node --check api/stats.js lib/stats.js lib/upstream.js lib/sqlite.js lib/supabase.js sync.js app.js tests/stats.test.js tests/api.test.js tests/sync.test.js",
-    "sync": "node sync.js"
-  },
-  "keywords": [
-    "rore",
-    "stats",
-    "vercel"
-  ],
-  "author": "rOreBurnIntern",
-  "license": "ISC",
-  "type": "commonjs",
   "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
   "dependencies": {
-    "@supabase/supabase-js": "^2.98.0",
-    "better-sqlite3": "^11.9.1",
     "daisyui": "^5.5.19",
-    "flowbite": "^4.0.1",
-    "pg": "^8.20.0"
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.8.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.1"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
