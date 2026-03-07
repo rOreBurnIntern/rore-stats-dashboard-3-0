@@ -1,12 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+let supabase: any = null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabase() {
+  if (supabase) return supabase;
+  
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+  
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
+  return supabase;
+}
 
 export async function fetchFallbackFromSupabase(limit = 1000) {
-  const { data, error } = await supabase
+  const client = getSupabase();
+  if (!client) {
+    console.log('Supabase not configured');
+    return null;
+  }
+
+  const { data, error } = await client
     .from('round_history')
     .select('*')
     .order('end_timestamp', { ascending: false })
