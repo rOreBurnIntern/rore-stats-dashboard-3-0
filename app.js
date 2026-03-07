@@ -203,6 +203,9 @@ const piePercentageLabelsPlugin = {
 
     ctx.save();
     ctx.fillStyle = opts.color || "#ffffff";
+    ctx.strokeStyle = opts.strokeColor || "rgba(7, 18, 34, 0.7)";
+    ctx.lineWidth = opts.strokeWidth ?? 2;
+    ctx.lineJoin = "round";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = opts.font || "700 12px 'Avenir Next', 'Segoe UI', sans-serif";
@@ -218,7 +221,9 @@ const piePercentageLabelsPlugin = {
       }
 
       const position = element.tooltipPosition();
-      ctx.fillText(`${Math.round(percentage)}%`, position.x, position.y);
+      const label = `${Math.round(percentage)}%`;
+      ctx.strokeText(label, position.x, position.y);
+      ctx.fillText(label, position.x, position.y);
     });
 
     ctx.restore();
@@ -259,6 +264,25 @@ function destroyCharts() {
       chartInstances[key] = null;
     }
   });
+}
+
+function enforceChartLayoutOrder() {
+  const chartsGrid = document.getElementById("charts");
+  if (!chartsGrid) {
+    return;
+  }
+
+  const pieCard = document.getElementById("pie-chart")?.closest("article");
+  const barCard = document.getElementById("bar-chart")?.closest("article");
+  const lineCard = document.getElementById("line-chart")?.closest("article");
+
+  if (!pieCard || !barCard || !lineCard) {
+    return;
+  }
+
+  chartsGrid.appendChild(pieCard);
+  chartsGrid.appendChild(barCard);
+  chartsGrid.appendChild(lineCard);
 }
 
 function buildDerivedData(rounds) {
@@ -321,6 +345,7 @@ function filterRounds(rounds, range) {
 }
 
 function renderCharts(data) {
+  enforceChartLayoutOrder();
   destroyCharts();
   const colors = readThemeColors();
   const baseOptions = sharedOptions();
@@ -391,6 +416,8 @@ function renderCharts(data) {
         },
         piePercentageLabelsPlugin: {
           color: "#ffffff",
+          strokeColor: "rgba(7, 18, 34, 0.66)",
+          strokeWidth: 2,
           minPercentage: 4
         }
       },

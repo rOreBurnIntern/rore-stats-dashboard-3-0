@@ -4,31 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rORE Stats</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
     <script src="/app.js" defer></script>
   </head>
   <body>
-    <div class="bg-orb bg-orb-a" aria-hidden="true"></div>
-    <div class="bg-orb bg-orb-b" aria-hidden="true"></div>
-    <div class="bg-grid" aria-hidden="true"></div>
-
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="page-header shell">
-      <div class="header-copy">
-        <p class="eyebrow">Real-time Protocol Dashboard</p>
+      <div>
         <h1>rORE Stats</h1>
-        <div class="meta-row">
-          <p id="last-updated">Last updated: --</p>
-          <p class="source" id="source-label">Source: --</p>
-        </div>
+        <p id="last-updated">Last updated: --</p>
+        <p class="source" id="source-label">Source: --</p>
       </div>
       <button id="theme-toggle" class="toggle" type="button" aria-label="Toggle color theme">Dark mode</button>
     </header>
@@ -38,24 +25,15 @@
         <h2 id="stats-heading">Protocol Stats</h2>
         <div class="stats-grid">
           <article class="card stat-card">
-            <div class="card-head">
-              <h3>Motherlode</h3>
-              <span class="chip">rORE</span>
-            </div>
+            <h3>Motherlode</h3>
             <p id="motherlode-value">--</p>
           </article>
           <article class="card stat-card">
-            <div class="card-head">
-              <h3>WETH</h3>
-              <span class="chip">USD</span>
-            </div>
+            <h3>WETH</h3>
             <p id="weth-value">--</p>
           </article>
           <article class="card stat-card">
-            <div class="card-head">
-              <h3>rORE</h3>
-              <span class="chip">USD</span>
-            </div>
+            <h3>rORE</h3>
             <p id="rore-value">--</p>
           </article>
         </div>
@@ -77,21 +55,15 @@
 
         <div id="charts" class="chart-grid hidden">
           <article class="card chart-card">
-            <div class="card-head">
-              <h3>Winner Type Distribution</h3>
-            </div>
+            <h3>Winner Type Distribution</h3>
             <canvas id="pie-chart" aria-label="Winner type distribution pie chart"></canvas>
           </article>
           <article class="card chart-card">
-            <div class="card-head">
-              <h3>Wins Per Block (0-24)</h3>
-            </div>
+            <h3>Wins Per Block (0-24)</h3>
             <canvas id="bar-chart" aria-label="Wins per block bar chart"></canvas>
           </article>
           <article class="card chart-wide">
-            <div class="card-head">
-              <h3>Motherlode Running Value</h3>
-            </div>
+            <h3>Motherlode Running Value</h3>
             <canvas id="line-chart" aria-label="Motherlode history line chart"></canvas>
           </article>
         </div>
