@@ -52,12 +52,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 18px 22px;
+  gap: 12px;
+  padding: 16px 20px;
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+}
+
+.page-header > div {
+  display: grid;
+  gap: 4px;
 }
 
 .dashboard-title {
@@ -72,13 +77,13 @@ body {
 }
 
 #last-updated {
-  margin: 6px 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
 }
 
 .source {
-  margin: 3px 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
@@ -88,7 +93,7 @@ body {
 .layout {
   margin-top: 16px;
   display: grid;
-  gap: 14px;
+  gap: 1rem;
 }
 
 .section {
@@ -118,7 +123,7 @@ body {
   margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .card {
@@ -135,7 +140,9 @@ body {
 }
 
 .stat-card {
-  padding: 14px;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
 }
 
 .stat-card h3,
@@ -149,7 +156,7 @@ body {
 }
 
 .stat-card p {
-  margin: 8px 0 0;
+  margin: 0;
   font-size: clamp(1.45rem, 2.1vw, 1.8rem);
   font-weight: 700;
   color: var(--accent);
@@ -204,17 +211,16 @@ body {
 .chart-grid {
   margin-top: 12px;
   display: grid;
-  gap: 12px;
+  gap: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .chart-card {
-  min-height: 320px;
+  min-height: 18.5rem;
   display: flex;
   flex-direction: column;
-
-  padding: 14px;
-  min-height: 280px;
+  gap: 0.75rem;
+  padding: 1rem;
 }
 
 .chart-wide {
@@ -224,12 +230,8 @@ body {
 .chart-canvas {
   flex: 1;
   width: 100% !important;
-  max-height: 260px;
-
   display: block;
-  width: 100% !important;
-  min-height: 240px;
-  margin-top: 10px;
+  min-height: 0;
   border-radius: 10px;
 }
 
@@ -268,19 +270,33 @@ body {
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem;
+  }
+
+  .page-header,
+  .section,
+  .stat-card,
+  .chart-card {
+    padding: 0.75rem;
+  }
+
+  .stats-grid,
   .chart-grid {
     grid-template-columns: 1fr;
   }
 
   .chart-wide {
     grid-column: auto;
-  }
-
-  .section-head {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
