@@ -73,9 +73,9 @@ export default function Home() {
     );
   }
 
-  const motherlode = parseFloat(data?.prices?.motherlode || '0');
-  const weth = parseFloat(data?.prices?.wethPrice || '0');
-  const rore = parseFloat(data?.prices?.rorePrice || '0');
+  const motherlode = parseFloat(data?.prices?.motherlode ?? '0');
+  const weth = parseFloat(data?.prices?.wethPrice ?? '0');
+  const rore = parseFloat(data?.prices?.rorePrice ?? '0');
   const roreUsd = rore * weth;
 
   return (
@@ -143,8 +143,8 @@ export default function Home() {
             <div className="card-body p-4">
               <h2 className="card-title text-sm">Winner Type Distribution</h2>
               <WinnerPieChart 
-                winnerTakeAll={data?.pie?.winnerTakeAll || 0} 
-                split={data?.pie?.split || 0} 
+                winnerTakeAll={data?.pie?.winnerTakeAll ?? 0} 
+                split={data?.pie?.split ?? 0} 
               />
             </div>
           </div>
@@ -152,14 +152,14 @@ export default function Home() {
           <div className="card bg-base-200 shadow-sm lg:col-span-2">
             <div className="card-body p-4">
               <h2 className="card-title text-sm">Wins by Block</h2>
-              <WinsBarChart data={data?.bar || []} />
+              <WinsBarChart data={data?.bar ?? []} />
             </div>
           </div>
           
           <div className="card bg-base-200 shadow-sm md:col-span-2 lg:col-span-3">
             <div className="card-body p-4">
               <h2 className="card-title text-sm">Motherlode History</h2>
-              <MotherlodeLineChart data={filterByRange(data?.line || [])} />
+              <MotherlodeLineChart data={filterByRange(data?.line ?? [])} />
             </div>
           </div>
         </div>

@@ -19,14 +19,14 @@ export function MotherlodeLineChart({ data }: LineChartProps) {
           <XAxis 
             dataKey="date" 
             tick={{ fontSize: 10 }}
-            interval={Math.floor(data.length / 6)}
+            interval={Math.max(0, Math.floor(data.length / 6))}
           />
           <YAxis 
             tick={{ fontSize: 10 }}
-            tickFormatter={(v) => v.toFixed(1)}
+            tickFormatter={(v) => Number(v).toFixed(1)}
           />
           <Tooltip 
-            formatter={(value: number) => [`${value.toFixed(2)} rORE`, 'Motherlode']}
+            formatter={(value) => [`${Number(value).toFixed(2)} rORE`, 'Motherlode']}
           />
           <Line 
             type="monotone" 
