@@ -55,7 +55,7 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const filterByRange = (lineData: typeof data.line) => {
+  const filterByRange = (lineData: Array<{timestamp: number; motherlode: number}) => {
     if (!lineData || range === 'all') return lineData;
     const cutoff = Date.now() - RANGE_MS[range]!;
     return lineData.filter(d => d.timestamp >= cutoff);
