@@ -216,7 +216,7 @@ body {
 }
 
 .chart-card {
-  min-height: 18.5rem;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -299,4 +299,9 @@ body {
   .chart-wide {
     grid-column: auto;
   }
+}
+
+/* Chart.js tooltip fix */
+.chart-canvas ~ .chartjs-tooltip {
+  color: #fff !important;
 }
