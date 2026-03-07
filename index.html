@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rORE Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
     <script src="/app.js" defer></script>
@@ -13,7 +19,7 @@
 
     <header class="page-header shell">
       <div>
-        <h1>rORE Stats</h1>
+        <h1 class="dashboard-title">rORE Stats</h1>
         <p id="last-updated">Last updated: --</p>
         <p class="source" id="source-label">Source: --</p>
       </div>
@@ -22,7 +28,7 @@
 
     <main id="main" class="layout shell">
       <section aria-labelledby="stats-heading" class="section">
-        <h2 id="stats-heading">Protocol Stats</h2>
+        <h2 id="stats-heading" class="section-title">Protocol Stats</h2>
         <div class="stats-grid">
           <article class="card stat-card">
             <h3>Motherlode</h3>
@@ -41,7 +47,7 @@
 
       <section aria-labelledby="charts-heading" class="section">
         <div class="section-head">
-          <h2 id="charts-heading">Round Analytics</h2>
+          <h2 id="charts-heading" class="section-title">Round Analytics</h2>
           <div class="filters" role="group" aria-label="Time range filters">
             <button type="button" class="filter-btn active" data-range="24h">24H</button>
             <button type="button" class="filter-btn" data-range="7d">7D</button>
@@ -56,15 +62,15 @@
         <div id="charts" class="chart-grid hidden">
           <article class="card chart-card">
             <h3>Winner Type Distribution</h3>
-            <canvas id="pie-chart" aria-label="Winner type distribution pie chart"></canvas>
+            <canvas id="pie-chart" class="chart-canvas chart-canvas--pie" aria-label="Winner type distribution pie chart"></canvas>
           </article>
           <article class="card chart-card">
             <h3>Wins Per Block (0-24)</h3>
-            <canvas id="bar-chart" aria-label="Wins per block bar chart"></canvas>
+            <canvas id="bar-chart" class="chart-canvas" aria-label="Wins per block bar chart"></canvas>
           </article>
-          <article class="card chart-wide">
+          <article class="card chart-card chart-wide">
             <h3>Motherlode Running Value</h3>
-            <canvas id="line-chart" aria-label="Motherlode history line chart"></canvas>
+            <canvas id="line-chart" class="chart-canvas chart-canvas--wide" aria-label="Motherlode history line chart"></canvas>
           </article>
         </div>
       </section>
