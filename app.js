@@ -357,13 +357,6 @@ function renderCharts(data) {
   const pieCanvas = document.getElementById("pie-chart");
   const barCanvas = document.getElementById("bar-chart");
 
-  // Keep pie and bar canvases visually identical in height.
-  [pieCanvas, barCanvas].forEach((canvas) => {
-    if (canvas) {
-      canvas.style.height = "240px";
-      canvas.style.minHeight = "240px";
-    }
-  });
 
   const barTitle = barCanvas?.closest("article")?.querySelector("h3");
   if (barTitle) {
