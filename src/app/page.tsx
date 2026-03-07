@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { WinnerPieChart } from '@/components/charts/PieChart';
 import { WinsBarChart } from '@/components/charts/BarChart';
 import { MotherlodeLineChart } from '@/components/charts/LineChart';
 
 type Range = '24h' | '7d' | 'all';
+type Theme = 'light' | 'night';
 
 interface LinePoint {
   timestamp: number;
@@ -13,8 +14,16 @@ interface LinePoint {
 }
 
 interface StatsData {
-  prices: { wethPrice: string; rorePrice: string; motherlode: string; lastUpdate: string };
-  pie: { winnerTakeAll: number; split: number };
+  prices: {
+    wethPrice: string;
+    rorePrice: string;
+    motherlode: string;
+    lastUpdate: string;
+  };
+  pie: {
+    winnerTakeAll: number;
+    split: number;
+  };
   bar: Array<{ block: number; wins: number }>;
   line: LinePoint[];
   source: string;
@@ -26,23 +35,28 @@ const RANGE_MS: Record<Range, number | null> = {
   all: null,
 };
 
+const THEME_KEY = 'rore-theme';
+
 export default function Home() {
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<Range>('24h');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const saved = localStorage.getItem('rore-theme');
-    if (saved) setTheme(saved as 'light' | 'dark');
-    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'night') {
+      setTheme(saved);
+      return;
     }
+
+    const prefersNight = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(prefersNight ? 'night' : 'light');
   }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('rore-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
   useEffect(() => {
@@ -52,130 +66,158 @@ export default function Home() {
         const res = await fetch('/api/stats');
         const json = await res.json();
         setData(json);
-      } catch (err) {
-        console.error('Failed to fetch:', err);
+      } catch (error) {
+        console.error('Failed to fetch stats data:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
+
     fetchData();
   }, []);
 
-  const filterByRange = (lineData: LinePoint[]): LinePoint[] => {
-    if (!lineData || range === 'all') return lineData;
-    const cutoff = Date.now() - RANGE_MS[range]!;
-    return lineData.filter(d => d.timestamp >= cutoff);
+  const filteredLine = (lineData: LinePoint[]): LinePoint[] => {
+    if (range === 'all') {
+      return lineData;
+    }
+    const cutoff = Date.now() - (RANGE_MS[range] ?? 0);
+    return lineData.filter((point) => point.timestamp >= cutoff);
   };
 
   if (loading) {
     return (
       <main data-theme={theme} className="min-h-screen bg-base-200">
-        <div className="flex items-center justify-center h-screen">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
+        <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 py-10 md:px-8">
+          <span className="loading loading-spinner loading-lg text-primary" />
         </div>
       </main>
     );
   }
 
-  const motherlode = parseFloat(data?.prices?.motherlode ?? '0');
-  const weth = parseFloat(data?.prices?.wethPrice ?? '0');
-  const rore = parseFloat(data?.prices?.rorePrice ?? '0');
+  const motherlode = Number.parseFloat(data?.prices?.motherlode ?? '0');
+  const rore = Number.parseFloat(data?.prices?.rorePrice ?? '0');
+  const weth = Number.parseFloat(data?.prices?.wethPrice ?? '0');
   const roreUsd = rore * weth;
+  const lastUpdate = data?.prices?.lastUpdate
+    ? new Date(data.prices.lastUpdate).toLocaleString()
+    : 'N/A';
 
   return (
-    <main data-theme={theme} className="min-h-screen bg-base-200 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        
-        {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-base-content">
-              rORE <span className="text-primary">Stats</span>
-            </h1>
-            <p className="text-base-content/60 mt-2 flex items-center gap-2">
-              Last updated: {data?.prices?.lastUpdate ? new Date(data.prices.lastUpdate).toLocaleString() : 'N/A'}
-              {data?.source === 'supabase' && <span className="badge badge-warning badge-sm">Cache</span>}
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="join shadow-sm">
-              {(['24h', '7d', 'all'] as Range[]).map((r) => (
+    <main data-theme={theme} className="min-h-screen bg-base-200">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-10">
+        <header className="card bg-base-100 shadow-xl rounded-3xl mb-8">
+          <div className="card-body p-6 md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h1 className="text-4xl font-bold leading-tight md:text-6xl bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+                  rORE Stats
+                </h1>
+                <p className="mt-3 text-base md:text-lg text-base-content/70">
+                  Last updated: {lastUpdate}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-start gap-3 lg:justify-end">
+                <div className="join">
+                  {(['24h', '7d', 'all'] as Range[]).map((currentRange) => (
+                    <button
+                      key={currentRange}
+                      type="button"
+                      className={`join-item btn btn-md ${
+                        range === currentRange ? 'btn-primary' : 'btn-ghost'
+                      }`}
+                      onClick={() => setRange(currentRange)}
+                    >
+                      {currentRange === 'all' ? 'ALL' : currentRange.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+
                 <button
-                  key={r}
-                  className={`join-item btn btn-sm ${range === r ? 'btn-primary' : 'btn-ghost'}`}
-                  onClick={() => setRange(r)}
+                  type="button"
+                  className="btn btn-md rounded-2xl"
+                  onClick={() => setTheme(theme === 'light' ? 'night' : 'light')}
+                  aria-label="Toggle theme"
+                  title="Toggle light/night theme"
                 >
-                  {r === 'all' ? 'ALL' : r.toUpperCase()}
+                  <span className="text-lg" aria-hidden="true">
+                    {theme === 'night' ? '☀️' : '🌙'}
+                  </span>
+                  <span className="text-sm md:text-base font-semibold">
+                    {theme === 'night' ? 'Light' : 'Night'}
+                  </span>
                 </button>
-              ))}
+              </div>
             </div>
-            <label className="swap swap-rotate btn btn-ghost btn-circle">
-              <input 
-                type="checkbox" 
-                checked={theme === 'dark'}
-                onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              />
-              <svg className="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
-              </svg>
-              <svg className="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-              </svg>
-            </label>
           </div>
         </header>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="card bg-base-100 shadow-lg">
-            <div className="card-body">
-              <h2 className="card-title text-base-content/60 text-sm">Motherlode</h2>
-              <p className="text-4xl font-bold text-primary">{motherlode.toFixed(2)}</p>
-              <p className="text-base-content/40 text-sm">rORE</p>
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-8">
+          <article className="card bg-base-100 shadow-xl rounded-3xl">
+            <div className="card-body p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-base-content/80 flex items-center gap-2">
+                <span aria-hidden="true">🔥</span>
+                Motherlode
+              </h2>
+              <p className="text-4xl md:text-5xl font-bold leading-none text-primary mt-2">
+                {motherlode.toFixed(2)}
+              </p>
+              <p className="text-base md:text-lg text-base-content/60">rORE</p>
             </div>
-          </div>
-          <div className="card bg-base-100 shadow-lg">
-            <div className="card-body">
-              <h2 className="card-title text-base-content/60 text-sm">rORE Price</h2>
-              <p className="text-4xl font-bold">${rore.toFixed(3)}</p>
-              <p className="text-base-content/40 text-sm">≈ ${roreUsd.toFixed(2)} USD</p>
-            </div>
-          </div>
-          <div className="card bg-base-100 shadow-lg">
-            <div className="card-body">
-              <h2 className="card-title text-base-content/60 text-sm">WETH Price</h2>
-              <p className="text-4xl font-bold">${weth.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              <p className="text-base-content/40 text-sm">USD</p>
-            </div>
-          </div>
-        </div>
+          </article>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="card bg-base-100 shadow-lg">
-            <div className="card-body">
-              <h2 className="card-title text-base-content/80 text-sm">Winner Type</h2>
-              <WinnerPieChart 
-                winnerTakeAll={data?.pie?.winnerTakeAll ?? 0} 
-                split={data?.pie?.split ?? 0} 
+          <article className="card bg-base-100 shadow-xl rounded-3xl">
+            <div className="card-body p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-base-content/80 flex items-center gap-2">
+                <span aria-hidden="true">💰</span>
+                rORE Price
+              </h2>
+              <p className="text-4xl md:text-5xl font-bold leading-none mt-2">
+                ${rore.toFixed(3)}
+              </p>
+              <p className="text-base md:text-lg text-base-content/60">≈ ${roreUsd.toFixed(2)} USD</p>
+            </div>
+          </article>
+
+          <article className="card bg-base-100 shadow-xl rounded-3xl">
+            <div className="card-body p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-base-content/80 flex items-center gap-2">
+                <span aria-hidden="true">Ξ</span>
+                WETH Price
+              </h2>
+              <p className="text-4xl md:text-5xl font-bold leading-none mt-2">
+                ${weth.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-base md:text-lg text-base-content/60">USD</p>
+            </div>
+          </article>
+        </section>
+
+        <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <article className="card bg-base-100 shadow-xl rounded-3xl xl:col-span-4">
+            <div className="card-body p-6">
+              <h2 className="text-lg md:text-xl font-semibold mb-2">Winner Type</h2>
+              <WinnerPieChart
+                winnerTakeAll={data?.pie?.winnerTakeAll ?? 0}
+                split={data?.pie?.split ?? 0}
               />
             </div>
-          </div>
-          
-          <div className="card bg-base-100 shadow-lg md:col-span-2">
-            <div className="card-body">
-              <h2 className="card-title text-base-content/80 text-sm">Wins by Block</h2>
+          </article>
+
+          <article className="card bg-base-100 shadow-xl rounded-3xl xl:col-span-8">
+            <div className="card-body p-6">
+              <h2 className="text-lg md:text-xl font-semibold mb-2">Wins by Block</h2>
               <WinsBarChart data={data?.bar ?? []} />
             </div>
-          </div>
-          
-          <div className="card bg-base-100 shadow-lg md:col-span-2 lg:col-span-3">
-            <div className="card-body">
-              <h2 className="card-title text-base-content/80 text-sm">Motherlode History</h2>
-              <MotherlodeLineChart data={filterByRange(data?.line ?? [])} />
+          </article>
+
+          <article className="card bg-base-100 shadow-xl rounded-3xl xl:col-span-12">
+            <div className="card-body p-6">
+              <h2 className="text-lg md:text-xl font-semibold mb-2">Motherlode History</h2>
+              <MotherlodeLineChart data={filteredLine(data?.line ?? [])} />
             </div>
-          </div>
-        </div>
+          </article>
+        </section>
       </div>
     </main>
   );
