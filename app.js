@@ -118,6 +118,102 @@ function sharedOptions() {
   };
 }
 
+const pieDepthPlugin = {
+  id: "pieDepthPlugin",
+  beforeDatasetDraw(chart, args, pluginOptions) {
+    if (args.index !== 0 || chart.config.type !== "doughnut") {
+      return;
+    }
+
+    const opts = pluginOptions || {};
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.shadowColor = opts.shadowColor || "rgba(8, 20, 36, 0.2)";
+    ctx.shadowBlur = opts.shadowBlur ?? 16;
+    ctx.shadowOffsetX = opts.shadowOffsetX ?? 0;
+    ctx.shadowOffsetY = opts.shadowOffsetY ?? 8;
+  },
+  afterDatasetDraw(chart, args) {
+    if (args.index !== 0 || chart.config.type !== "doughnut") {
+      return;
+    }
+    chart.ctx.restore();
+  }
+};
+
+const piePercentageLabelsPlugin = {
+  id: "piePercentageLabelsPlugin",
+  afterDatasetsDraw(chart, _args, pluginOptions) {
+    if (chart.config.type !== "doughnut") {
+      return;
+    }
+
+    const dataset = chart.data.datasets[0];
+    if (!dataset || !Array.isArray(dataset.data)) {
+      return;
+    }
+
+    const values = dataset.data.map((value) => Number(value) || 0);
+    const total = values.reduce((sum, value) => sum + value, 0);
+    if (!total) {
+      return;
+    }
+
+    const opts = pluginOptions || {};
+    const meta = chart.getDatasetMeta(0);
+    const ctx = chart.ctx;
+
+    ctx.save();
+    ctx.fillStyle = opts.color || "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = opts.font || "700 12px 'Avenir Next', 'Segoe UI', sans-serif";
+
+    meta.data.forEach((element, index) => {
+      const value = values[index];
+      if (!value) {
+        return;
+      }
+      const percentage = (value / total) * 100;
+      if (percentage < (opts.minPercentage ?? 4)) {
+        return;
+      }
+
+      const position = element.tooltipPosition();
+      ctx.fillText(`${Math.round(percentage)}%`, position.x, position.y);
+    });
+
+    ctx.restore();
+  }
+};
+
+function createPieGradients(chart) {
+  const { ctx, chartArea } = chart;
+  if (!chartArea) {
+    return null;
+  }
+
+  const winnerGradient = ctx.createLinearGradient(
+    chartArea.left,
+    chartArea.top,
+    chartArea.right,
+    chartArea.bottom
+  );
+  winnerGradient.addColorStop(0, "#5ab0ff");
+  winnerGradient.addColorStop(1, "#2e6ef0");
+
+  const splitGradient = ctx.createLinearGradient(
+    chartArea.right,
+    chartArea.top,
+    chartArea.left,
+    chartArea.bottom
+  );
+  splitGradient.addColorStop(0, "#5ce3c6");
+  splitGradient.addColorStop(1, "#169b85");
+
+  return [winnerGradient, splitGradient];
+}
+
 function destroyCharts() {
   Object.keys(chartInstances).forEach((key) => {
     if (chartInstances[key]) {
@@ -191,24 +287,82 @@ function renderCharts(data) {
   const colors = readThemeColors();
 
   chartInstances.pie = new Chart(document.getElementById("pie-chart"), {
-    type: "pie",
+    type: "doughnut",
     data: {
       labels: ["Winner Take All", "Split"],
       datasets: [
         {
           data: [data.pie.winnerTakeAll, data.pie.split],
-          backgroundColor: [colors.accent, colors.accentStrong],
+          backgroundColor(context) {
+            return createPieGradients(context.chart) || [colors.accent, colors.accentStrong];
+          },
           borderColor: colors.panel,
-          borderWidth: 2
+          borderWidth: 3,
+          hoverBorderWidth: 4,
+          spacing: 2,
+          hoverOffset: 10
         }
       ]
     },
     options: {
+      cutout: "64%",
+      animation: {
+        animateRotate: true,
+        duration: 850,
+        easing: "easeOutCubic"
+      },
       plugins: {
-        legend: { labels: { color: colors.text } },
-        tooltip: { enabled: true }
+        legend: {
+          position: "bottom",
+          align: "center",
+          labels: {
+            color: colors.text,
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 12,
+            boxHeight: 12,
+            padding: 18,
+            font: {
+              size: 13,
+              weight: "600"
+            }
+          }
+        },
+        tooltip: {
+          enabled: true,
+          backgroundColor: colors.tooltipBg,
+          titleColor: colors.tooltipText,
+          bodyColor: colors.tooltipText,
+          borderColor: colors.accent,
+          borderWidth: 1,
+          callbacks: {
+            label(context) {
+              const value = Number(context.raw) || 0;
+              const values = (context.dataset.data || []).map((item) => Number(item) || 0);
+              const total = values.reduce((sum, item) => sum + item, 0);
+              const pct = total ? ((value / total) * 100).toFixed(1) : "0.0";
+              return `${context.label}: ${value} (${pct}%)`;
+            }
+          }
+        },
+        pieDepthPlugin: {
+          shadowColor: "rgba(7, 18, 34, 0.22)",
+          shadowBlur: 18,
+          shadowOffsetY: 8
+        },
+        piePercentageLabelsPlugin: {
+          color: "#ffffff",
+          minPercentage: 4
+        }
+      },
+      layout: {
+        padding: {
+          top: 4,
+          bottom: 8
+        }
       }
-    }
+    },
+    plugins: [pieDepthPlugin, piePercentageLabelsPlugin]
   });
 
   chartInstances.bar = new Chart(document.getElementById("bar-chart"), {
