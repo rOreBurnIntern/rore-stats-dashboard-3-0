@@ -72,8 +72,28 @@ async function refreshFromUpstream(db, options = {}) {
 }
 
 module.exports = async function handler(req, res) {
-  const db = openDatabase();
+  let db = null;
   try {
+    db = openDatabase();
+  } catch (err) {
+    // SQLite not available (e.g., Vercel serverless) - use upstream API
+  }
+  
+  try {
+    if (!db) {
+      // No database - use upstream API directly
+      const prices = await fetchJsonWithRetry(`${UPSTREAM_BASE}/api/prices`, { timeoutMs: 25000 });
+      const explorePages = await fetchExplorePages({ maxPages: 15, timeoutMs: 25000 });
+      const data = buildStatsPayload(prices, explorePages);
+      jsonResponse(res, 200, {
+        ok: true,
+        source: "upstream",
+        pagesFetched: explorePages.length,
+        data
+      });
+      return;
+    }
+    
     const state = getSyncState(db);
     const isFresh = Boolean(state && state.lastSyncMs && (Date.now() - state.lastSyncMs) <= MAX_CACHE_AGE_MS);
 
