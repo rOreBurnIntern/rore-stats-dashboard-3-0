@@ -8,12 +8,10 @@ export default function Home() {
         <p className="text-sm opacity-70 mt-2">Loading...</p>
       </header>
       
-      <section className="card bg-base-200 shadow-sm">
-        <div className="card-body">
-          <h2 className="card-title">Protocol Stats</h2>
-          <p>Next.js migration in progress...</p>
-        </div>
-      </section>
+      <div className="rounded-xl border bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold mb-2">Protocol Stats</h2>
+        <p>Next.js migration in progress...</p>
+      </div>
     </main>
   );
 }
