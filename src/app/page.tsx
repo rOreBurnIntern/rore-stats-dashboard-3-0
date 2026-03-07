@@ -128,20 +128,25 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap items-center justify-start gap-3 lg:justify-end">
-                <button
-                  type="button"
-                  className="btn btn-primary btn-md rounded-2xl"
-                  onClick={() => setTheme(theme === 'light' ? 'night' : 'light')}
-                  aria-label="Toggle theme"
-                  title="Toggle light/night theme"
+                <div
+                  className="tooltip tooltip-bottom"
+                  data-tip={`Switch to ${theme === 'night' ? 'Light' : 'Night'} mode`}
                 >
-                  <span className="text-lg" aria-hidden="true">
-                    {theme === 'night' ? '☀️' : '🌙'}
-                  </span>
-                  <span className="text-sm md:text-base font-semibold">
-                    {theme === 'night' ? 'Light' : 'Night'}
-                  </span>
-                </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-lg btn-square rounded-2xl shadow-lg shadow-primary/30 ring-2 ring-primary/20"
+                    onClick={() => setTheme(theme === 'light' ? 'night' : 'light')}
+                    aria-label={`Switch to ${theme === 'night' ? 'Light' : 'Night'} mode`}
+                    title={`Switch to ${theme === 'night' ? 'Light' : 'Night'} mode`}
+                  >
+                    <span className="text-2xl leading-none" aria-hidden="true">
+                      {theme === 'night' ? '☀️' : '🌙'}
+                    </span>
+                    <span className="sr-only">
+                      {theme === 'night' ? 'Switch to Light mode' : 'Switch to Night mode'}
+                    </span>
+                  </button>
+                </div>
 
                 <div className="join">
                   {(['24h', '7d', 'all'] as Range[]).map((currentRange) => (
