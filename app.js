@@ -111,11 +111,6 @@ function withAlpha(color, alpha) {
 function sharedOptions() {
   const colors = readThemeColors();
   return {
-    responsive: true,
-    maintainAspectRatio: false,
-    layout: {
-      padding: 0
-    },
     plugins: {
       legend: {
         labels: {
@@ -208,9 +203,6 @@ const piePercentageLabelsPlugin = {
 
     ctx.save();
     ctx.fillStyle = opts.color || "#ffffff";
-    ctx.strokeStyle = opts.strokeColor || "rgba(7, 18, 34, 0.7)";
-    ctx.lineWidth = opts.strokeWidth ?? 2;
-    ctx.lineJoin = "round";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = opts.font || "700 12px 'Avenir Next', 'Segoe UI', sans-serif";
@@ -226,9 +218,7 @@ const piePercentageLabelsPlugin = {
       }
 
       const position = element.tooltipPosition();
-      const label = `${Math.round(percentage)}%`;
-      ctx.strokeText(label, position.x, position.y);
-      ctx.fillText(label, position.x, position.y);
+      ctx.fillText(`${Math.round(percentage)}%`, position.x, position.y);
     });
 
     ctx.restore();
@@ -271,28 +261,9 @@ function destroyCharts() {
   });
 }
 
-function enforceChartLayoutOrder() {
-  const chartsGrid = document.getElementById("charts");
-  if (!chartsGrid) {
-    return;
-  }
-
-  const pieCard = document.getElementById("pie-chart")?.closest("article");
-  const barCard = document.getElementById("bar-chart")?.closest("article");
-  const lineCard = document.getElementById("line-chart")?.closest("article");
-
-  if (!pieCard || !barCard || !lineCard) {
-    return;
-  }
-
-  chartsGrid.appendChild(pieCard);
-  chartsGrid.appendChild(barCard);
-  chartsGrid.appendChild(lineCard);
-}
-
 function buildDerivedData(rounds) {
   const pie = { winnerTakeAll: 0, split: 0 };
-  const bar = Array.from({ length: 25 }, (_, block) => ({ block, wins: 0 }));
+  const bar = Array.from({ length: 26 }, (_, block) => ({ block, wins: 0 }));
 
   const sortedRounds = rounds.slice().sort((a, b) => {
     const aMs = toTimestampMs(a.endTimestamp);
@@ -310,7 +281,7 @@ function buildDerivedData(rounds) {
       pie.split += 1;
     }
 
-    if (Number.isInteger(round.winnerBlock) && round.winnerBlock >= 0 && round.winnerBlock < 25) {
+    if (Number.isInteger(round.winnerBlock) && round.winnerBlock >= 0 && round.winnerBlock < 26) {
       bar[round.winnerBlock].wins += 1;
     }
   }
@@ -350,20 +321,11 @@ function filterRounds(rounds, range) {
 }
 
 function renderCharts(data) {
-  enforceChartLayoutOrder();
   destroyCharts();
   const colors = readThemeColors();
   const baseOptions = sharedOptions();
-  const pieCanvas = document.getElementById("pie-chart");
-  const barCanvas = document.getElementById("bar-chart");
 
-
-  const barTitle = barCanvas?.closest("article")?.querySelector("h3");
-  if (barTitle) {
-    barTitle.textContent = "Wins Per Block (1-25)";
-  }
-
-  chartInstances.pie = new Chart(pieCanvas, {
+  chartInstances.pie = new Chart(document.getElementById("pie-chart"), {
     type: "doughnut",
     data: {
       labels: ["Winner Take All", "Split"],
@@ -382,8 +344,6 @@ function renderCharts(data) {
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
       cutout: "64%",
       animation: {
         animateRotate: true,
@@ -431,8 +391,6 @@ function renderCharts(data) {
         },
         piePercentageLabelsPlugin: {
           color: "#ffffff",
-          strokeColor: "rgba(7, 18, 34, 0.66)",
-          strokeWidth: 2,
           minPercentage: 4
         }
       },
@@ -446,10 +404,10 @@ function renderCharts(data) {
     plugins: [pieDepthPlugin, piePercentageLabelsPlugin]
   });
 
-  chartInstances.bar = new Chart(barCanvas, {
+  chartInstances.bar = new Chart(document.getElementById("bar-chart"), {
     type: "bar",
     data: {
-      labels: data.bar.map((item) => String(item.block + 1)),
+      labels: data.bar.map((item) => String(item.block)),
       datasets: [
         {
           label: "Wins",
@@ -467,9 +425,6 @@ function renderCharts(data) {
     },
     options: {
       ...baseOptions,
-      layout: {
-        padding: 0
-      },
       plugins: {
         ...baseOptions.plugins,
         legend: { display: false }
