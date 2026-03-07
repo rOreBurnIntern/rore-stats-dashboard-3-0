@@ -4,7 +4,7 @@
   "description": "rORE Stats V4 dashboard",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo \"No build step required\"",
+    "build": "./node_modules/.bin/tailwindcss -i styles.input.css -o styles.css --minify",
     "start": "vercel dev",
     "test": "node --test",
     "lint": "node --check api/stats.js lib/stats.js lib/upstream.js lib/sqlite.js lib/supabase.js sync.js app.js tests/stats.test.js tests/api.test.js tests/sync.test.js",
@@ -25,6 +25,7 @@
     "pg": "^8.20.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.1",
     "@tailwindcss/forms": "^0.5.11",
     "autoprefixer": "^10.4.27",
     "postcss": "^8.5.8",
