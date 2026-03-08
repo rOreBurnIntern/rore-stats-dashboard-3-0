@@ -1,22 +1,17 @@
-import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
-import "./globals.css";
-
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
+import './globals.css';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "rORE Stats",
-  description: "rORE Protocol Analytics Dashboard",
+  title: 'rORE Stats',
+  description: 'rORE Protocol Analytics Dashboard',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={spaceGrotesk.className}>{children}</body>
+    <html lang="en" data-theme="light">
+      <body>{children}</body>
     </html>
   );
 }

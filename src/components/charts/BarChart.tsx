@@ -2,27 +2,23 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-interface BarChartProps {
+interface Props {
   data: Array<{ block: number; wins: number }>;
 }
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
 
-export function WinsBarChart({ data }: BarChartProps) {
+export function BarChartComponent({ data }: Props) {
   return (
-    <div className="h-64">
+    <div className="h-48">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <XAxis 
-            dataKey="block" 
-            tick={{ fontSize: 10 }}
-            interval={4}
-          />
+        <BarChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+          <XAxis dataKey="block" tick={{ fontSize: 10 }} />
           <YAxis tick={{ fontSize: 10 }} />
           <Tooltip />
-          <Bar dataKey="wins" radius={[4, 4, 0, 0]}>
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          <Bar dataKey="wins" radius={[2, 2, 0, 0]}>
+            {data.map((_, i) => (
+              <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Bar>
         </BarChart>

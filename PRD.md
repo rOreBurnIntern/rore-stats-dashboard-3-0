@@ -32,80 +32,80 @@ A responsive analytics dashboard for rORE that includes:
 Dependencies: None
 
 Tasks with detailed test conditions:
-- [ ] Audit existing rORE Stats data sources, transforms, and UI sections.
+- [x] Audit existing rORE Stats data sources, transforms, and UI sections.
   - Test: create an inventory checklist that names every data source endpoint, every transformed field, and every rendered widget; verify all existing dashboard sections map to at least one data source field.
-- [ ] Define canonical data contract for cards/charts/time filters.
+- [x] Define canonical data contract for cards/charts/time filters.
   - Test: `src/types/dashboard.ts` (or equivalent) defines interfaces for cards/charts/filters; `npm run build` passes with no `any` in dashboard response typing and every rendered metric references typed fields.
-- [ ] Confirm migration success metrics (performance, reliability, feature parity).
+- [x] Confirm migration success metrics (performance, reliability, feature parity).
   - Test: PRD includes numeric targets for page load, API success/fallback behavior, and parity scope; each target includes a measurement method and pass/fail threshold.
 
 ### Phase 2: Next.js Foundation Setup
 Dependencies: Phase 1
 
 Tasks with detailed test conditions:
-- [ ] Set up Next.js 14 app structure with TypeScript and App Router.
+- [x] Set up Next.js 14 app structure with TypeScript and App Router.
   - Test: run `npm run dev`, open `/`, confirm page renders; run `npm run build`, confirm no TypeScript/App Router compile errors.
-- [ ] Configure Tailwind 3 and DaisyUI 4 theme scaffolding.
+- [x] Configure Tailwind 3 and DaisyUI 4 theme scaffolding.
   - Test: add a Tailwind utility class and DaisyUI component on a test page, confirm styles are applied in browser and no missing plugin warnings appear in build output.
-- [ ] Establish shared types and utility modules for stats/chart transforms.
+- [x] Establish shared types and utility modules for stats/chart transforms.
   - Test: at least one API route and one UI component import shared transform/types module; `npm run build` succeeds and IDE/typecheck reports no unresolved imports.
 
 ### Phase 3: Data Layer and API Resilience
 Dependencies: Phase 2
 
 Tasks with detailed test conditions:
-- [ ] Implement Next.js API route for dashboard data aggregation.
+- [x] Implement Next.js API route for dashboard data aggregation.
   - Test: run `curl -i /api/dashboard?range=24H`, `7D`, and `ALL`; each returns HTTP 200 with JSON containing `stats`, `charts`, `lastUpdated`, and `range`.
-- [ ] Add upstream-first fetch strategy with Supabase fallback.
+- [x] Add upstream-first fetch strategy with Supabase fallback.
   - Test: simulate upstream timeout/500 (mock or env toggle), call `/api/dashboard`; verify fallback source is used, response still returns HTTP 200, and dashboard renders without runtime errors.
-- [ ] Normalize and validate payload before returning to UI.
+- [x] Normalize and validate payload before returning to UI.
   - Test: compare successful upstream and fallback payloads against one schema validator; both pass with identical key set and value types.
-- [ ] Add route-level error handling and logging metadata.
+- [x] Add route-level error handling and logging metadata.
   - Test: force both upstream and fallback failures; verify API returns non-200 with stable error JSON (`error.code`, `error.message`, `requestId`) and server logs include request id plus source failure reason.
 
 ### Phase 4: Dashboard UI Migration
 Dependencies: Phase 3
 
 Tasks with detailed test conditions:
-- [ ] Build dashboard header with app title, last updated timestamp, theme toggle, and time filters.
+- [x] Build dashboard header with app title, last updated timestamp, theme toggle, and time filters.
   - Test: open dashboard, confirm title/timestamp/toggle/filter buttons render; click `24H`, `7D`, `ALL` and verify each click triggers one API request with matching `range` query param.
-- [ ] Implement three stats cards using normalized API response.
+- [x] Implement three stats cards using normalized API response.
   - Test: cards render expected labels and formatted numbers (currency/integers); switching time range updates all card values and no stale value remains.
-- [ ] Implement three Recharts visualizations.
+- [x] Implement three Recharts visualizations.
   - Test: each chart renders at least one data series with tooltip labels; resize from desktop to mobile widths and confirm charts rerender without overlap or console errors.
-- [ ] Add dedicated loading and error states for data requests.
+- [x] Add dedicated loading and error states for data requests.
   - Test: throttle network to `Slow 3G`, confirm loading indicator appears until response resolves; force API failure, confirm error state appears with retry button, click retry and verify successful recovery path.
 
 ### Phase 5: UX Hardening and Responsive Behavior
 Dependencies: Phase 4
 
 Tasks with detailed test conditions:
-- [ ] Implement persisted light/night theme using `localStorage`.
+- [x] Implement persisted light/night theme using `localStorage`.
   - Test: click theme toggle to `night`, confirm `localStorage` stores selected theme and UI updates; refresh page and verify `night` theme remains; repeat for `light`.
-- [ ] Complete responsive layout for mobile, tablet, and desktop breakpoints.
+- [x] Complete responsive layout for mobile, tablet, and desktop breakpoints.
   - Test: validate layout at 390x844, 768x1024, and 1440x900; confirm no horizontal scroll, cards stack correctly, and chart axes/labels remain readable.
-- [ ] Add accessibility checks for keyboard navigation and color contrast.
+- [x] Add accessibility checks for keyboard navigation and color contrast.
   - Test: keyboard-tab through all controls and activate filters/toggle/retry with Enter/Space; run automated a11y scan (axe/Lighthouse) and confirm no critical contrast or missing-label violations.
 
 ### Phase 6: Verification and Release Readiness
 Dependencies: Phase 5
 
 Tasks with detailed test conditions:
-- [ ] Add unit tests for transform/filter logic and fallback selection behavior.
+- [x] Add unit tests for transform/filter logic and fallback selection behavior.
   - Test: unit suite covers transform outputs for `24H`, `7D`, `ALL`, empty input, malformed rows, and fallback selector decision tree; all tests pass in CI.
-- [ ] Add integration tests for API route and dashboard rendering states.
+- [x] Add integration tests for API route and dashboard rendering states.
   - Test: integration tests call `/api/dashboard` with mocked sources and assert success payload, fallback payload, and failure payload; UI integration verifies loading-to-success and loading-to-error transitions.
-- [ ] Run production build validation and smoke test checklist.
+- [x] Run production build validation and smoke test checklist.
   - Test: run `npm run build && npm run start`, open dashboard, verify cards/charts load on live path; simulate upstream outage and verify fallback path still serves usable dashboard.
 
 ## Acceptance Criteria
-- [ ] Dashboard includes header, three stats cards, and three charts.
-- [ ] Time filters (`24H`, `7D`, `ALL`) update cards and charts correctly.
-- [ ] Theme toggle supports `light` and `night`, persisted via `localStorage`.
-- [ ] Next.js API route returns data from upstream source and automatically falls back to Supabase when upstream fails.
-- [ ] Loading and error states are implemented and user-visible.
-- [ ] Responsive behavior works across mobile, tablet, and desktop without broken layout.
-- [ ] Codebase uses Next.js 14, TypeScript, Tailwind 3, DaisyUI 4, and Recharts for the migrated dashboard.
+- [x] Dashboard includes header, three stats cards, and three charts.
+- [x] Time filters (`24H`, `7D`, `ALL`) update cards and charts correctly.
+- [x] Theme toggle supports `light` and `night`, persisted via `localStorage`.
+- [x] Next.js API route returns data from upstream source and automatically falls back to Supabase when upstream fails.
+- [x] Loading and error states are implemented and user-visible.
+- [x] Responsive behavior works across mobile, tablet, and desktop without broken layout.
+- [x] Codebase uses Next.js 14, TypeScript, Tailwind 3, DaisyUI 4, and Recharts for the migrated dashboard.
 
 ## UI Layout (ASCII)
 
