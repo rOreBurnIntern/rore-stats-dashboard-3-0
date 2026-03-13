@@ -1,0 +1,10 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/sync",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "buildCommand": "next build",
+  "installCommand": "npm install"
+}

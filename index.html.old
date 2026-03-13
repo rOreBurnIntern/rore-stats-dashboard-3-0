@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rORE Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
+    <script src="/app.js" defer></script>
+  </head>
+  <body class="min-h-screen">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <main id="main" class="max-w-6xl mx-auto grid gap-4 px-4 py-6 md:px-6">
+      <header class="rounded-xl border bg-white p-4 shadow-sm flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight">rORE Stats</h1>
+          <p id="last-updated" class="mt-2 text-sm opacity-70">Last updated: --</p>
+          <p id="source-label" class="mt-1 text-xs uppercase tracking-wide opacity-60">Source: --</p>
+        </div>
+        <button id="theme-toggle" class="btn btn-primary" type="button" aria-label="Toggle color theme">Dark mode</button>
+      </header>
+
+      <section class="rounded-xl border bg-white p-4 shadow-sm">
+        <h2 class="section-title text-lg">Protocol Stats</h2>
+        <div class="stats-grid grid grid-cols-3 gap-4 mt-4">
+          <article class="stat-card rounded-xl border bg-white p-4 shadow-sm">
+            <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">Motherlode</h3>
+            <p id="motherlode-value">--</p>
+          </article>
+          <article class="stat-card rounded-xl border bg-white p-4 shadow-sm">
+            <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">WETH</h3>
+            <p id="weth-value">--</p>
+          </article>
+          <article class="stat-card rounded-xl border bg-white p-4 shadow-sm">
+            <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">rORE</h3>
+            <p id="rore-value">--</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="rounded-xl border bg-white p-4 shadow-sm grid gap-4">
+        <div class="section-header flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <h2 class="section-title text-lg">Round Analytics</h2>
+          <div class="filters flex flex-wrap gap-2">
+            <button type="button" class="filter-btn btn btn-primary active" data-range="24h">24H</button>
+            <button type="button" class="filter-btn btn btn-primary" data-range="7d">7D</button>
+            <button type="button" class="filter-btn btn btn-primary" data-range="all">ALL</button>
+          </div>
+        </div>
+
+        <div id="loading" class="state">Loading stats...</div>
+        <div id="error" class="state hidden" role="alert"></div>
+        <div id="empty" class="state hidden">No round data available for this range.</div>
+
+        <div id="charts" class="charts-grid hidden grid gap-4 md:grid-cols-2">
+          <article class="chart-card rounded-xl border bg-white p-4 shadow-sm">
+            <h3 class="text-sm font-semibold">Winner Type Distribution</h3>
+            <div class="chart-wrap">
+              <canvas id="pie-chart" aria-label="Winner type distribution pie chart"></canvas>
+            </div>
+          </article>
+          <article class="chart-card rounded-xl border bg-white p-4 shadow-sm">
+            <h3 class="text-sm font-semibold">Wins Per Block (1-25)</h3>
+            <div class="chart-wrap">
+              <canvas id="bar-chart" aria-label="Wins per block bar chart"></canvas>
+            </div>
+          </article>
+          <article class="chart-card chart-wide rounded-xl border bg-white p-4 shadow-sm md:col-span-2">
+            <h3 class="text-sm font-semibold">Motherlode Running Value</h3>
+            <div class="chart-wrap">
+              <canvas id="line-chart" aria-label="Motherlode history line chart"></canvas>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
