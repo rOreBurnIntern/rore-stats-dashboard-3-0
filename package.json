@@ -1,5 +1,5 @@
 {
-  "name": "rore-stats",
+  "name": "rore-stats-dashboard-3-0",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,20 +8,21 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "chart.js": "^4.5.1",
+    "daisyui": "^4.12.0",
     "next": "14.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "recharts": "^2.10.0",
-    "daisyui": "^4.12.0",
-    "@supabase/supabase-js": "^2.39.0"
+    "recharts": "^2.10.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10",
     "postcss": "^8",
-    "autoprefixer": "^10"
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.0.0"
   }
 }
