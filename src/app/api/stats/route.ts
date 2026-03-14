@@ -9,6 +9,9 @@ async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, mother
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
+    console.log('[fetchMotherlodeHistory] URL:', supabaseUrl ? 'set' : 'missing');
+    console.log('[fetchMotherlodeHistory] Key:', supabaseKey ? 'set' : 'missing');
+    
     if (!supabaseUrl || !supabaseKey) {
       console.warn('[fetchMotherlodeHistory] Supabase credentials not available');
       return [];
@@ -22,6 +25,8 @@ async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, mother
       .from('motherlode_snapshots')
       .select('round_id, motherlode_value')
       .order('round_id', { ascending: true });
+
+    console.log('[fetchMotherlodeHistory] Query result:', { rows: data?.length, error: error?.message });
 
     if (error) {
       console.warn('[fetchMotherlodeHistory] Query error:', error.message);
