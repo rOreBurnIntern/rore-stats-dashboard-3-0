@@ -1,9 +1,11 @@
-import BlockPerformanceBar from './components/BlockPerformanceBar';
-import DashboardStats from './components/DashboardStats';
-import MotherlodeLineChart from './components/MotherlodeLineChart';
-import WinnerTypesPie from './components/WinnerTypesPie';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import dynamic from 'next/dynamic';
+
+const BlockPerformanceBar = dynamic(() => import('./components/BlockPerformanceBar'), { ssr: false });
+const DashboardStats = dynamic(() => import('./components/DashboardStats'), { ssr: false });
+const MotherlodeLineChart = dynamic(() => import('./components/MotherlodeLineChart'), { ssr: false });
+const WinnerTypesPie = dynamic(() => import('./components/WinnerTypesPie'), { ssr: false });
 
 export default function Home() {
   return (
