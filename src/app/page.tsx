@@ -113,25 +113,27 @@ export default function Home() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="card bg-base-100 shadow-lg">
             <div className="card-body p-4">
               <h2 className="card-title text-sm">Winner Type</h2>
-              <PieChartComponent 
-                winnerTakeAll={data?.charts?.pie?.winnerTakeAll || 0} 
-                split={data?.charts?.pie?.split || 0} 
+              <PieChartComponent
+                winnerTakeAll={data?.charts?.pie?.winnerTakeAll || 0}
+                split={data?.charts?.pie?.split || 0}
               />
             </div>
           </div>
-          
-          <div className="card bg-base-100 shadow-lg md:col-span-2">
+
+          <div className="card bg-base-100 shadow-lg">
             <div className="card-body p-4">
               <h2 className="card-title text-sm">Wins by Block</h2>
               <BarChartComponent data={data?.charts?.bar || []} />
             </div>
           </div>
-          
-          <div className="card bg-base-100 shadow-lg md:col-span-2 lg:col-span-3">
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 mt-4">
+          <div className="card bg-base-100 shadow-lg">
             <div className="card-body p-4">
               <h2 className="card-title text-sm">Motherlode History</h2>
               <LineChartComponent data={data?.charts?.line || []} />
