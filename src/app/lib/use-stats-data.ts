@@ -5,6 +5,46 @@ import type { DbStatsData } from './db-stats';
 
 let statsDataPromise: Promise<DbStatsData | null> | null = null;
 
+function normalizeUpstreamResponse(raw: any): DbStatsData | null {
+  try {
+    // Old upstream format has { ok, source, data: { stats, pie, bar, line, rounds } }
+    if (raw?.data?.stats && raw?.data?.pie) {
+      const { stats, pie, bar, line, rounds } = raw.data;
+      
+      return {
+        currentPrice: {
+          rORE: Number(stats?.rore) || 0,
+          WETH: Number(stats?.weth) || 0,
+        },
+        motherlodeTotal: Number(stats?.motherlode) || 0,
+        totalORELocked: 0, // Not available in upstream format
+        blockPerformance: Array.isArray(bar)
+          ? bar.map((b: any) => ({
+              block: Number(b.block),
+              wins: Number(b.wins),
+              percentage: 0, // Calculate if needed
+            }))
+          : [],
+        winnerTypesDistribution: {
+          WINNER_TAKE_ALL: Number(pie?.winnerTakeAll) || 0,
+          SPLIT_EVENLY: Number(pie?.split) || 0,
+        },
+        motherlodeHistory: Array.isArray(line)
+          ? line.map((l: any) => ({
+              round_id: Number(l.roundId),
+              motherlode_running: Number(l.motherlodeValue),
+            }))
+          : [],
+      };
+    }
+    
+    return null;
+  } catch (err) {
+    console.error('[normalizeUpstreamResponse] Error:', err);
+    return null;
+  }
+}
+
 async function fetchStatsData(): Promise<DbStatsData | null> {
   const response = await fetch('/api/stats', { cache: 'no-store' });
 
@@ -12,7 +52,22 @@ async function fetchStatsData(): Promise<DbStatsData | null> {
     throw new Error(`Failed to fetch stats: ${response.status}`);
   }
 
-  return response.json();
+  const raw = await response.json();
+
+  // Check if response is new DbStatsData format (has currentPrice at top level)
+  if (raw?.currentPrice) {
+    return raw as DbStatsData;
+  }
+
+  // Otherwise, try to normalize from old upstream format
+  const normalized = normalizeUpstreamResponse(raw);
+  if (normalized) {
+    return normalized;
+  }
+
+  // If we can't normalize, log and return null
+  console.warn('[fetchStatsData] Unable to parse API response format:', raw);
+  return null;
 }
 
 function loadStatsData() {
