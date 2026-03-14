@@ -137,18 +137,12 @@ async function fetchUpstreamStats(): Promise<DbStatsData | null> {
 }
 
 export async function GET() {
-  // Try Supabase-backed data first
-  let data: DbStatsData | null = await getDbStatsData();
-
-  // Fall back to upstream proxy if Supabase is unavailable
-  if (!data) {
-    console.warn('[/api/stats] Supabase unavailable, falling back to upstream proxy');
-    data = await fetchUpstreamStats();
-  }
+  // Get upstream stats (normalized format)
+  let data: DbStatsData | null = await fetchUpstreamStats();
 
   if (!data) {
     return Response.json(
-      { error: 'Failed to load stats data from all sources' },
+      { error: 'Failed to load stats data' },
       { status: 500 }
     );
   }
