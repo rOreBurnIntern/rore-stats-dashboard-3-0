@@ -8,7 +8,8 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js';
-import { DbStatsData } from '../lib/db-stats';
+import type { DbStatsData } from '../lib/db-stats';
+import { useStatsData } from '../lib/use-stats-data';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -18,12 +19,20 @@ interface WinnerTypesPieProps {
 }
 
 export default function WinnerTypesPie({ data: propData }: WinnerTypesPieProps) {
-  const data = propData ?? null;
+  const { data, loading, error } = useStatsData(propData ?? null);
+
+  if (loading && !data) {
+    return (
+      <div className="text-center py-8 text-gray-400" data-testid="winner-types-pie-loading">
+        <p>Loading data...</p>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
       <div className="text-center py-8 text-gray-400" data-testid="winner-types-pie-error">
-        <p>Unable to load data. Please try again later.</p>
+        <p>{error ?? 'Unable to load data. Please try again later.'}</p>
       </div>
     );
   }

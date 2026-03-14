@@ -14,7 +14,8 @@ import {
   Filler
 } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { DbStatsData } from '../lib/db-stats';
+import type { DbStatsData } from '../lib/db-stats';
+import { useStatsData } from '../lib/use-stats-data';
 
 ChartJS.register(
   CategoryScale,
@@ -33,15 +34,26 @@ interface MotherlodeLineChartProps {
 }
 
 export default function MotherlodeLineChart({ data: propData }: MotherlodeLineChartProps) {
-  const data = propData ?? null;
+  const { data, loading, error } = useStatsData(propData ?? null);
   const chartRef = useRef<any>(null);
+
+  if (loading && !data) {
+    return (
+      <div className="w-full p-4">
+        <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
+        <div className="text-center text-gray-400">
+          Loading motherlode data...
+        </div>
+      </div>
+    );
+  }
 
   if (!data || !data.motherlodeHistory || data.motherlodeHistory.length === 0) {
     return (
       <div className="w-full p-4">
         <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
         <div className="text-center text-gray-400">
-          No motherlode data available
+          {error ?? 'No motherlode data available'}
         </div>
       </div>
     );

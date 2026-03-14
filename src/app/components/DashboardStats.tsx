@@ -1,12 +1,25 @@
+'use client';
+
 import StatCard from './StatCard';
-import { DbStatsData } from '../lib/db-stats';
+import type { DbStatsData } from '../lib/db-stats';
+import { useStatsData } from '../lib/use-stats-data';
 
 interface DashboardStatsProps {
   data?: DbStatsData | null;
 }
 
 export default function DashboardStats({ data: propData }: DashboardStatsProps) {
-  const data = propData ?? null;
+  const { data, loading } = useStatsData(propData ?? null);
+
+  if (loading && !data) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+        <div className="col-span-full text-center text-gray-400">
+          Loading stats data...
+        </div>
+      </div>
+    );
+  }
 
   if (!data) {
     return (

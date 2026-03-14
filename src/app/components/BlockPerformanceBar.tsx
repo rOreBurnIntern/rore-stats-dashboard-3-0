@@ -10,7 +10,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { DbStatsData } from '../lib/db-stats';
+import type { DbStatsData } from '../lib/db-stats';
+import { useStatsData } from '../lib/use-stats-data';
 
 // Register Chart.js components
 ChartJS.register(
@@ -27,12 +28,23 @@ interface BlockPerformanceBarProps {
 }
 
 export default function BlockPerformanceBar({ data: propData }: BlockPerformanceBarProps) {
-  const data = propData ?? null;
+  const { data, loading, error } = useStatsData(propData ?? null);
+
+  if (loading && !data) {
+    return (
+      <div className="w-full p-4 border rounded-lg shadow bg-white">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">Loading block performance data...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!data) {
     return (
       <div className="w-full p-4 border rounded-lg shadow bg-white">
         <div className="flex items-center justify-center h-64">
-          <p className="text-red-500">Failed to load block performance data</p>
+          <p className="text-red-500">{error ?? 'Failed to load block performance data'}</p>
         </div>
       </div>
     );
