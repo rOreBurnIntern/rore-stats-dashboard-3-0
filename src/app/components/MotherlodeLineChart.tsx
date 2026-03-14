@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,7 +12,6 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import zoomPlugin from 'chartjs-plugin-zoom';
 import type { DbStatsData } from '../lib/db-stats';
 import { useStatsData } from '../lib/use-stats-data';
 
@@ -25,8 +23,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
-  zoomPlugin
+  Filler
 );
 
 interface MotherlodeLineChartProps {
@@ -35,7 +32,6 @@ interface MotherlodeLineChartProps {
 
 export default function MotherlodeLineChart({ data: propData }: MotherlodeLineChartProps) {
   const { data, loading, error } = useStatsData(propData ?? null);
-  const chartRef = useRef<any>(null);
 
   if (loading && !data) {
     return (
@@ -80,14 +76,6 @@ export default function MotherlodeLineChart({ data: propData }: MotherlodeLineCh
     responsive: true,
     maintainAspectRatio: true,
     plugins: {
-      zoom: {
-        zoom: {
-          wheel: { enabled: true, speed: 0.1 },
-          pinch: { enabled: true },
-          mode: 'xy'
-        },
-        pan: { enabled: true, mode: 'xy' }
-      },
       tooltip: {
         callbacks: {
           label: (context: any) => {
@@ -101,25 +89,19 @@ export default function MotherlodeLineChart({ data: propData }: MotherlodeLineCh
       legend: { display: true, position: 'top' }
     },
     scales: {
-      y: { title: { display: true, text: 'Motherlode (rORE)' } },
-      x: { title: { display: true, text: 'Round ID' } }
+      y: { 
+        ticks: { callback: (v: any) => v.toFixed(0) }
+      },
+      x: {}
     }
   };
 
   return (
     <div className="w-full p-4">
       <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
-      <div className="bg-gray-900 rounded border border-gray-700 p-4">
-        <Line ref={chartRef} data={chartData} options={options} />
+      <div className="bg-gray-900 rounded border border-gray-700 p-4" style={{ height: '400px' }}>
+        <Line data={chartData} options={options} />
       </div>
-      <button
-        onClick={() => {
-          chartRef.current?.resetZoom?.();
-        }}
-        className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
-      >
-        Reset Zoom/Pan
-      </button>
     </div>
   );
 }
