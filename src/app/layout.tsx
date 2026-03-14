@@ -10,8 +10,8 @@ export default function RootLayout({
   children,
 }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light">
-      <body>{children}</body>
+    <html lang="en">
+      <body className="bg-gray-100 min-h-screen">{children}</body>
     </html>
   );
 }
