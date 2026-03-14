@@ -28,10 +28,15 @@ async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, mother
       return [];
     }
 
-    return (data || []).map((row: any) => ({
-      round_id: Number(row.round_id),
-      motherlode_running: Number(row.motherlode_value),
-    }));
+    return (data || []).map((row: any) => {
+      // Convert Wei (18 decimals) to decimal number
+      const weiValue = BigInt(row.motherlode_value);
+      const decimalValue = Number(weiValue) / 1e18;
+      return {
+        round_id: Number(row.round_id),
+        motherlode_running: Math.round(decimalValue * 100) / 100, // Round to 2 decimals
+      };
+    });
   } catch (err) {
     console.error('[fetchMotherlodeHistory] Error:', err instanceof Error ? err.message : String(err));
     return [];
