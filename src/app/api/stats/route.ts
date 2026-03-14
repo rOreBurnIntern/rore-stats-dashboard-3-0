@@ -6,14 +6,11 @@ export const dynamic = 'force-dynamic';
 
 async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, motherlode_running: number}>> {
   try {
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    console.log('[fetchMotherlodeHistory] URL:', supabaseUrl ? 'set' : 'missing');
-    console.log('[fetchMotherlodeHistory] Key:', supabaseKey ? 'set' : 'missing');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!supabaseUrl || !supabaseKey) {
-      console.warn('[fetchMotherlodeHistory] Supabase credentials not available');
+      console.warn('[fetchMotherlodeHistory] Supabase credentials missing', { url: !!supabaseUrl, key: !!supabaseKey });
       return [];
     }
 
@@ -26,10 +23,8 @@ async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, mother
       .select('round_id, motherlode_value')
       .order('round_id', { ascending: true });
 
-    console.log('[fetchMotherlodeHistory] Query result:', { rows: data?.length, error: error?.message });
-
     if (error) {
-      console.warn('[fetchMotherlodeHistory] Query error:', error.message);
+      console.error('[fetchMotherlodeHistory] Query error:', error);
       return [];
     }
 
@@ -39,7 +34,7 @@ async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, mother
       const decimalValue = Number(weiValue) / 1e18;
       return {
         round_id: Number(row.round_id),
-        motherlode_running: Math.round(decimalValue * 100) / 100, // Round to 2 decimals
+        motherlode_running: Math.round(decimalValue * 100) / 100,
       };
     });
   } catch (err) {
