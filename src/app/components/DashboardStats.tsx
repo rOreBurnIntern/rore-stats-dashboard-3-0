@@ -54,7 +54,7 @@ export default function DashboardStats({ data: propData }: DashboardStatsProps) 
       <StatCard
         label="Motherlode Total"
         value={motherlode.toFixed(2)}
-        unit="WETH"
+        unit="rORE"
       />
       <StatCard
         label="Total rORE Locked"

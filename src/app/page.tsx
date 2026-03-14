@@ -22,18 +22,20 @@ export default function Home() {
         </section>
 
         {/* Charts Grid */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column: Winner Types Pie + Block Performance Bar */}
-          <div className="flex flex-col gap-8">
-            <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
-              <WinnerTypesPie />
-            </div>
-            <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
-              <BlockPerformanceBar />
-            </div>
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Left Column: Winner Types Pie */}
+          <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
+            <WinnerTypesPie />
           </div>
 
-          {/* Right Column: Motherlode Line Chart */}
+          {/* Right Column: Block Performance Bar */}
+          <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
+            <BlockPerformanceBar />
+          </div>
+        </section>
+
+        {/* Motherlode Line Chart (Full Width at Bottom) */}
+        <section>
           <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
             <MotherlodeLineChart />
           </div>

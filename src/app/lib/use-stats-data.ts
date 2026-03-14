@@ -11,12 +11,18 @@ function normalizeUpstreamResponse(raw: any): DbStatsData | null {
     if (raw?.data?.stats && raw?.data?.pie) {
       const { stats, pie, bar, line, rounds } = raw.data;
       
+      // For motherlodeTotal: prefer stats.motherlode, fall back to last line value if available
+      let motherlodeTotal = Number(stats?.motherlode) || 0;
+      if (motherlodeTotal === 0 && Array.isArray(line) && line.length > 0) {
+        motherlodeTotal = Number(line[line.length - 1].motherlodeValue) || 0;
+      }
+
       return {
         currentPrice: {
           rORE: Number(stats?.rore) || 0,
           WETH: Number(stats?.weth) || 0,
         },
-        motherlodeTotal: Number(stats?.motherlode) || 0,
+        motherlodeTotal,
         totalORELocked: 0, // Not available in upstream format
         blockPerformance: Array.isArray(bar)
           ? bar.map((b: any) => ({
