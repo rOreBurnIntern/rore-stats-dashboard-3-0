@@ -1,3 +1,5 @@
+'use client';
+
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -11,7 +13,8 @@ import {
   Filler
 } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { getDbStatsData } from '../lib/db-stats';
+import { getDbStatsData, DbStatsData } from '../lib/db-stats';
+import { useEffect, useState } from 'react';
 
 ChartJS.register(
   CategoryScale,
@@ -25,14 +28,40 @@ ChartJS.register(
   zoomPlugin
 );
 
-export default async function MotherlodeLineChart() {
-  const data = await getDbStatsData();
+export default function MotherlodeLineChart() {
+  const [data, setData] = useState<DbStatsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!data || !data.motherlodeHistory || data.motherlodeHistory.length === 0) {
+  useEffect(() => {
+    async function fetchData() {
+      const result = await getDbStatsData();
+      if (!result) {
+        setError('Failed to load motherlode data');
+      } else {
+        setData(result);
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  if (loading) {
     return (
       <div className="w-full p-4">
         <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
-        <div className="text-center text-gray-400">No motherlode data available</div>
+        <div className="text-center text-gray-400">Loading chart...</div>
+      </div>
+    );
+  }
+
+  if (error || !data || !data.motherlodeHistory || data.motherlodeHistory.length === 0) {
+    return (
+      <div className="w-full p-4">
+        <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
+        <div className="text-center text-gray-400">
+          {error || 'No motherlode data available'}
+        </div>
       </div>
     );
   }
@@ -87,7 +116,11 @@ export default async function MotherlodeLineChart() {
         <Line data={chartData} options={options} />
       </div>
       <button
-        onClick={() => window.location.reload()}
+        onClick={() => {
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
+        }}
         className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
       >
         Reset Zoom/Pan
