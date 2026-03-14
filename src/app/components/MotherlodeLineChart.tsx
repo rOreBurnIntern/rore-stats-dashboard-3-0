@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,8 +14,7 @@ import {
   Filler
 } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { getDbStatsData, DbStatsData } from '../lib/db-stats';
-import { useEffect, useState } from 'react';
+import { DbStatsData } from '../lib/db-stats';
 
 ChartJS.register(
   CategoryScale,
@@ -28,39 +28,20 @@ ChartJS.register(
   zoomPlugin
 );
 
-export default function MotherlodeLineChart() {
-  const [data, setData] = useState<DbStatsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface MotherlodeLineChartProps {
+  data?: DbStatsData | null;
+}
 
-  useEffect(() => {
-    async function fetchData() {
-      const result = await getDbStatsData();
-      if (!result) {
-        setError('Failed to load motherlode data');
-      } else {
-        setData(result);
-      }
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
+export default function MotherlodeLineChart({ data: propData }: MotherlodeLineChartProps) {
+  const data = propData ?? null;
+  const chartRef = useRef<any>(null);
 
-  if (loading) {
-    return (
-      <div className="w-full p-4">
-        <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
-        <div className="text-center text-gray-400">Loading chart...</div>
-      </div>
-    );
-  }
-
-  if (error || !data || !data.motherlodeHistory || data.motherlodeHistory.length === 0) {
+  if (!data || !data.motherlodeHistory || data.motherlodeHistory.length === 0) {
     return (
       <div className="w-full p-4">
         <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
         <div className="text-center text-gray-400">
-          {error || 'No motherlode data available'}
+          No motherlode data available
         </div>
       </div>
     );
@@ -113,13 +94,11 @@ export default function MotherlodeLineChart() {
     <div className="w-full p-4">
       <h3 className="text-xl font-bold mb-4">Motherlode History (All Rounds)</h3>
       <div className="bg-gray-900 rounded border border-gray-700 p-4">
-        <Line data={chartData} options={options} />
+        <Line ref={chartRef} data={chartData} options={options} />
       </div>
       <button
         onClick={() => {
-          if (typeof window !== 'undefined') {
-            window.location.reload();
-          }
+          chartRef.current?.resetZoom?.();
         }}
         className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
       >

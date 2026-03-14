@@ -3,13 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MotherlodeLineChart from '../src/app/components/MotherlodeLineChart';
 
-// Mock the getDbStatsData function
-vi.mock('../src/app/lib/db-stats', () => ({
-  getDbStatsData: vi.fn(),
-}));
-
-import { getDbStatsData } from '../src/app/lib/db-stats';
-
 // Mock Chart.js to avoid canvas issues in tests
 vi.mock('react-chartjs-2', () => ({
   Line: ({ data, options, ref }: { data: any; options: any; ref?: any }) => (
@@ -52,9 +45,7 @@ describe('MotherlodeLineChart Component', () => {
   };
 
   it('renders line chart canvas/component', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('mock-line-chart')).toBeInTheDocument();
@@ -62,20 +53,15 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('title displays "Motherlode History (All Rounds)"', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
-      // Check for h3 heading with exact text
-      expect(screen.getByRole('heading', { name: /Motherlore History \(All Rounds\)/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Motherlode History \(All Rounds\)/i })).toBeInTheDocument();
     });
   });
 
   it('chart registers zoom plugin with wheel and pinch enabled', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const zoomPlugin = screen.getByTestId('zoom-plugin');
@@ -88,20 +74,18 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('pan is enabled in both directions', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
-      const panEnabled = screen.getByTestId('pan-enabled');
-      expect(panEnabled.textContent).toBe('true');
+      const zoomPlugin = screen.getByTestId('zoom-plugin');
+      const config = JSON.parse(zoomPlugin.textContent || '{}');
+      expect(config.pan?.enabled).toBe(true);
+      expect(config.pan?.mode).toBe('xy');
     });
   });
 
   it('reset button exists and is clickable', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const resetButton = screen.getByRole('button', { name: /reset zoom/i });
@@ -111,10 +95,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('calls resetZoom on reset button click', async () => {
-    const mockResetZoom = vi.fn();
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const resetButton = screen.getByRole('button', { name: /reset zoom/i });
@@ -126,9 +107,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('X-axis shows round IDs as labels', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const labelsElement = screen.getByTestId('chart-labels');
@@ -138,9 +117,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('Y-axis data corresponds to motherlode_running values', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const dataElement = screen.getByTestId('chart-data');
@@ -153,9 +130,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('line color is rORE motherlode accent (golden/warm tone)', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const colorElement = screen.getByTestId('chart-color');
@@ -166,9 +141,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('displays tooltips with round ID and motherlode amount format', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       // We verify tooltip configuration exists in options
@@ -187,9 +160,7 @@ describe('MotherlodeLineChart Component', () => {
       ...mockDbData,
       motherlodeHistory: manyPoints
     };
-    vi.mocked(getDbStatsData).mockResolvedValue(largeMockData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={largeMockData} />);
 
     await waitFor(() => {
       const labelsElement = screen.getByTestId('chart-labels');
@@ -199,20 +170,17 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('handles null/undefined data gracefully', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(null);
-
-    const { container } = render(<MotherlodeLineChart />);
+    const { container } = render(<MotherlodeLineChart data={null} />);
 
     await waitFor(() => {
       expect(container).toBeInTheDocument();
+      expect(screen.getByText('No motherlode data available')).toBeInTheDocument();
     });
   });
 
   it('renders without console errors', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       expect(consoleSpy).not.toHaveBeenCalled();
@@ -222,9 +190,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('is responsive (scales to container width)', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    const { container } = render(<MotherlodeLineChart />);
+    const { container } = render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       const chartContainer = container.querySelector('[data-testid="mock-line-chart"]');
@@ -233,9 +199,7 @@ describe('MotherlodeLineChart Component', () => {
   });
 
   it('has proper WETH labeling on Y-axis reference', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<MotherlodeLineChart />);
+    render(<MotherlodeLineChart data={mockDbData} />);
 
     await waitFor(() => {
       // The component should label the data as WETH in tooltips and axes

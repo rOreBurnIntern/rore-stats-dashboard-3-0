@@ -1,13 +1,14 @@
-'use client';
+import BlockPerformanceBar from './components/BlockPerformanceBar';
+import DashboardStats from './components/DashboardStats';
+import MotherlodeLineChart from './components/MotherlodeLineChart';
+import WinnerTypesPie from './components/WinnerTypesPie';
+import { getDbStatsData } from './lib/db-stats';
 
-import dynamic from 'next/dynamic';
+export const dynamic = 'force-dynamic';
 
-const DashboardStats = dynamic(() => import('./components/DashboardStats'), { ssr: false });
-const WinnerTypesPie = dynamic(() => import('./components/WinnerTypesPie'), { ssr: false });
-const BlockPerformanceBar = dynamic(() => import('./components/BlockPerformanceBar'), { ssr: false });
-const MotherlodeLineChart = dynamic(() => import('./components/MotherlodeLineChart'), { ssr: false });
+export default async function Home() {
+  const data = await getDbStatsData();
 
-export default function Home() {
   return (
     <main className="min-h-screen bg-gray-950 text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -20,7 +21,7 @@ export default function Home() {
 
         {/* Stat Cards Grid */}
         <section className="mb-8">
-          <DashboardStats />
+          <DashboardStats data={data} />
         </section>
 
         {/* Charts Grid */}
@@ -28,16 +29,16 @@ export default function Home() {
           {/* Left Column: Winner Types Pie + Block Performance Bar */}
           <div className="flex flex-col gap-8">
             <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
-              <WinnerTypesPie />
+              <WinnerTypesPie data={data} />
             </div>
             <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
-              <BlockPerformanceBar />
+              <BlockPerformanceBar data={data} />
             </div>
           </div>
 
           {/* Right Column: Motherlode Line Chart */}
           <div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">
-            <MotherlodeLineChart />
+            <MotherlodeLineChart data={data} />
           </div>
         </section>
       </div>

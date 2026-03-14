@@ -1,34 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import WinnerTypesPie from '../src/app/components/WinnerTypesPie';
 
-// Mock the db-stats module
-vi.mock('../src/app/lib/db-stats', () => ({
-  getDbStatsData: vi.fn()
-}));
-
-// Get reference to the mocked function
-import { getDbStatsData } from '../src/app/lib/db-stats';
-const mockGetDbStatsData = vi.mocked(getDbStatsData);
+const mockDbData = {
+  currentPrice: { rORE: 0.0781, WETH: 2087.4 },
+  motherlodeTotal: 1234.56,
+  totalORELocked: 98765.43,
+  blockPerformance: [],
+  winnerTypesDistribution: { WINNER_TAKE_ALL: 600, SPLIT_EVENLY: 444 },
+  motherlodeHistory: [],
+};
 
 describe('WinnerTypesPie Component', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('renders loading state initially', () => {
-    mockGetDbStatsData.mockImplementation(() => new Promise(() => {})); // Never resolves
-
-    render(<WinnerTypesPie />);
-    expect(screen.getByTestId('winner-types-pie-loading')).toBeInTheDocument();
-  });
-
-  it('renders pie chart canvas after data loads', async () => {
-    mockGetDbStatsData.mockResolvedValue({
-      winnerTypesDistribution: { WINNER_TAKE_ALL: 600, SPLIT_EVENLY: 444 }
-    });
-
-    render(<WinnerTypesPie />);
+  it('renders pie chart canvas when data is provided', async () => {
+    render(<WinnerTypesPie data={mockDbData} />);
 
     await waitFor(() => {
       const container = screen.getByTestId('winner-types-pie');
@@ -39,11 +24,7 @@ describe('WinnerTypesPie Component', () => {
   });
 
   it('title displays correct text', async () => {
-    mockGetDbStatsData.mockResolvedValue({
-      winnerTypesDistribution: { WINNER_TAKE_ALL: 600, SPLIT_EVENLY: 444 }
-    });
-
-    render(<WinnerTypesPie />);
+    render(<WinnerTypesPie data={mockDbData} />);
 
     await waitFor(() => {
       expect(screen.getByText('Winner Types (Last 1,044 Rounds)')).toBeInTheDocument();
@@ -51,11 +32,7 @@ describe('WinnerTypesPie Component', () => {
   });
 
   it('chart renders without crashing with valid data', async () => {
-    mockGetDbStatsData.mockResolvedValue({
-      winnerTypesDistribution: { WINNER_TAKE_ALL: 600, SPLIT_EVENLY: 444 }
-    });
-
-    const { container } = render(<WinnerTypesPie />);
+    const { container } = render(<WinnerTypesPie data={mockDbData} />);
 
     await waitFor(() => {
       const canvas = container.querySelector('canvas');
@@ -63,10 +40,8 @@ describe('WinnerTypesPie Component', () => {
     });
   });
 
-  it('handles null data gracefully', async () => {
-    mockGetDbStatsData.mockResolvedValue(null);
-
-    render(<WinnerTypesPie />);
+  it('handles missing data gracefully', async () => {
+    render(<WinnerTypesPie data={null} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('winner-types-pie-error')).toBeInTheDocument();
@@ -75,11 +50,14 @@ describe('WinnerTypesPie Component', () => {
   });
 
   it('renders with zero values', async () => {
-    mockGetDbStatsData.mockResolvedValue({
-      winnerTypesDistribution: { WINNER_TAKE_ALL: 0, SPLIT_EVENLY: 0 }
-    });
-
-    const { container } = render(<WinnerTypesPie />);
+    const { container } = render(
+      <WinnerTypesPie
+        data={{
+          ...mockDbData,
+          winnerTypesDistribution: { WINNER_TAKE_ALL: 0, SPLIT_EVENLY: 0 }
+        }}
+      />
+    );
 
     await waitFor(() => {
       const canvas = container.querySelector('canvas');
@@ -88,11 +66,7 @@ describe('WinnerTypesPie Component', () => {
   });
 
   it('shows both segments in chart data', async () => {
-    mockGetDbStatsData.mockResolvedValue({
-      winnerTypesDistribution: { WINNER_TAKE_ALL: 600, SPLIT_EVENLY: 444 }
-    });
-
-    render(<WinnerTypesPie />);
+    render(<WinnerTypesPie data={mockDbData} />);
 
     await waitFor(() => {
       // The chart is rendered; the data is correctly structured

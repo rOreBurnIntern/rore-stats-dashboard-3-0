@@ -9,23 +9,23 @@ const source = fs.readFileSync(pagePath, 'utf8');
 test('uses a dedicated two-column lg grid for pie/bar charts', () => {
   assert.match(
     source,
-    /grid grid-cols-1 lg:grid-cols-2 gap-4/,
-    'expected a 2-column lg grid container for Winner Type and Block Performance'
+    /<section className="grid grid-cols-1 lg:grid-cols-2 gap-8">/,
+    'expected a 2-column lg grid container for the chart area'
   );
 });
 
-test('does not keep legacy 3-column chart grid', () => {
-  assert.doesNotMatch(
-    source,
-    /grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4/,
-    'legacy 3-column chart grid should be removed'
-  );
-});
-
-test('places line chart in a separate full-width row', () => {
+test('stacks pie and bar charts in the left column', () => {
   assert.match(
     source,
-    /<div className="grid grid-cols-1 gap-4 mt-4">[\s\S]*Motherlode History/,
-    'expected Motherlode History chart in its own full-width row'
+    /<div className="flex flex-col gap-8">[\s\S]*WinnerTypesPie[\s\S]*BlockPerformanceBar/,
+    'expected WinnerTypesPie and BlockPerformanceBar to share the left column'
+  );
+});
+
+test('renders the motherlode chart in the right column card', () => {
+  assert.match(
+    source,
+    /<div className="bg-gray-900 rounded-lg border border-gray-700 p-4 shadow-lg">[\s\S]*MotherlodeLineChart/,
+    'expected MotherlodeLineChart to render in the right column card'
   );
 });

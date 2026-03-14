@@ -1,12 +1,12 @@
 import StatCard from './StatCard';
-import { getDbStatsData, DbStatsData } from '../lib/db-stats';
+import { DbStatsData } from '../lib/db-stats';
 
 interface DashboardStatsProps {
   data?: DbStatsData | null;
 }
 
-export default async function DashboardStats({ data: propData }: DashboardStatsProps) {
-  const data = propData !== undefined ? propData : await getDbStatsData();
+export default function DashboardStats({ data: propData }: DashboardStatsProps) {
+  const data = propData ?? null;
 
   if (!data) {
     return (

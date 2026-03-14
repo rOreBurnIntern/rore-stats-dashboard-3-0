@@ -1,14 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import BlockPerformanceBar from '../src/app/components/BlockPerformanceBar';
-
-// Mock the getDbStatsData function
-vi.mock('../src/app/lib/db-stats', () => ({
-  getDbStatsData: vi.fn(),
-}));
-
-import { getDbStatsData } from '../src/app/lib/db-stats';
 
 // Mock Chart.js to avoid canvas issues in tests
 vi.mock('react-chartjs-2', () => ({
@@ -68,9 +60,7 @@ describe('BlockPerformanceBar Component', () => {
   };
 
   it('renders bar chart component without crashing', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('mock-bar-chart')).toBeInTheDocument();
@@ -78,9 +68,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('displays the correct title "Block Performance (All Rounds)"', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       expect(screen.getByText('Block Performance (All Rounds)')).toBeInTheDocument();
@@ -88,9 +76,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('renders with exactly 25 data points (bars)', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       const chartDataElement = screen.getByTestId('chart-data');
@@ -100,9 +86,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('x-axis shows block numbers 1-25', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       const labelsElement = screen.getByTestId('chart-labels');
@@ -114,9 +98,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('y-axis data corresponds to win counts for each block', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       const dataElement = screen.getByTestId('chart-data');
@@ -130,9 +112,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('bar color is rORE primary blue', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       const colorElement = screen.getByTestId('chart-color');
@@ -144,20 +124,16 @@ describe('BlockPerformanceBar Component', () => {
     });
   });
 
-  it('handles empty or null data gracefully', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(null);
-
-    // Should not throw
-    const { container } = render(<BlockPerformanceBar />);
+  it('handles null data gracefully', async () => {
+    const { container } = render(<BlockPerformanceBar data={null} />);
     await waitFor(() => {
       expect(container).toBeInTheDocument();
+      expect(screen.getByText('Failed to load block performance data')).toBeInTheDocument();
     });
   });
 
   it('is responsive (container adapts to width)', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    const { container } = render(<BlockPerformanceBar />);
+    const { container } = render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       const chartContainer = container.querySelector('[data-testid="mock-bar-chart"]');
@@ -167,9 +143,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('has tooltips configured to show win count', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       // We can verify that callbacks are configured in the options
@@ -180,9 +154,7 @@ describe('BlockPerformanceBar Component', () => {
   });
 
   it('all blocks 1-25 are present in blockPerformance data array', async () => {
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       // In real implementation, we'd check that blockPerformance includes all 25 blocks
@@ -198,9 +170,7 @@ describe('BlockPerformanceBar Component', () => {
 
   it('renders without console errors', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.mocked(getDbStatsData).mockResolvedValue(mockDbData);
-
-    render(<BlockPerformanceBar />);
+    render(<BlockPerformanceBar data={mockDbData} />);
 
     await waitFor(() => {
       expect(consoleSpy).not.toHaveBeenCalled();

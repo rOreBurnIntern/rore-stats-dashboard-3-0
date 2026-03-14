@@ -8,8 +8,7 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js';
-import { useEffect, useState } from 'react';
-import { getDbStatsData, DbStatsData } from '../lib/db-stats';
+import { DbStatsData } from '../lib/db-stats';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -19,32 +18,7 @@ interface WinnerTypesPieProps {
 }
 
 export default function WinnerTypesPie({ data: propData }: WinnerTypesPieProps) {
-  const [internalData, setInternalData] = useState<DbStatsData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Use prop data if provided, otherwise fetch
-  const data = propData !== undefined ? propData : internalData;
-
-  useEffect(() => {
-    if (propData === undefined) {
-      async function fetchData() {
-        const result = await getDbStatsData();
-        setInternalData(result);
-        setLoading(false);
-      }
-      fetchData();
-    } else {
-      setLoading(false);
-    }
-  }, [propData]);
-
-  if (loading) {
-    return (
-      <div className="text-center py-8 text-[#fff3e8]" data-testid="winner-types-pie-loading">
-        <p>Loading...</p>
-      </div>
-    );
-  }
+  const data = propData ?? null;
 
   if (!data) {
     return (
