@@ -32,15 +32,8 @@ function normalizeUpstreamResponse(raw: any): DbStatsData | null {
           SPLIT_EVENLY: Number(pie?.split) || 0,
         },
         // NOTE: Historical motherlode data not available from upstream API.
-        // Using current motherlode value for all rounds. History will be built going forward.
-        motherlodeHistory: Array.isArray(line)
-          ? line
-              .filter((l: any) => l.roundId != null)
-              .map((l: any) => ({
-                round_id: Number(l.roundId),
-                motherlode_running: motherlodeTotal, // Use current value for all rounds
-              }))
-          : [],
+        // Returning empty array. History will be built going forward as new rounds arrive.
+        motherlodeHistory: [],
       };
     }
     
