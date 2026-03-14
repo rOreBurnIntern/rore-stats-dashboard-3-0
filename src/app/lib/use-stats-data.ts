@@ -11,11 +11,7 @@ function normalizeUpstreamResponse(raw: any): DbStatsData | null {
     if (raw?.data?.stats && raw?.data?.pie) {
       const { stats, pie, bar, line, rounds } = raw.data;
       
-      // For motherlodeTotal: prefer stats.motherlode, fall back to last line value if available
-      let motherlodeTotal = Number(stats?.motherlode) || 0;
-      if (motherlodeTotal === 0 && Array.isArray(line) && line.length > 0) {
-        motherlodeTotal = Number(line[line.length - 1].motherlodeValue) || 0;
-      }
+      const motherlodeTotal = Number(stats?.motherlode) || 0;
 
       return {
         currentPrice: {
@@ -35,30 +31,15 @@ function normalizeUpstreamResponse(raw: any): DbStatsData | null {
           WINNER_TAKE_ALL: Number(pie?.winnerTakeAll) || 0,
           SPLIT_EVENLY: Number(pie?.split) || 0,
         },
+        // NOTE: Historical motherlode data not available from upstream API.
+        // Using current motherlode value for all rounds. History will be built going forward.
         motherlodeHistory: Array.isArray(line)
-          ? (() => {
-              // If line has motherlodeValue, check if it's incremental and compute cumulative sum
-              const values = line.map((l: any) => Number(l.motherlodeValue) || 0);
-              const isCumulative = values.length > 1 && values[values.length - 1] < 100; // Heuristic: if last value < 100, likely incremental
-              
-              if (isCumulative && values.length > 0) {
-                // Compute cumulative sum
-                let cumSum = 0;
-                return line.map((l: any, idx: number) => {
-                  cumSum += values[idx];
-                  return {
-                    round_id: Number(l.roundId),
-                    motherlode_running: cumSum,
-                  };
-                });
-              } else {
-                // Use values as-is
-                return line.map((l: any) => ({
-                  round_id: Number(l.roundId),
-                  motherlode_running: Number(l.motherlodeValue),
-                }));
-              }
-            })()
+          ? line
+              .filter((l: any) => l.roundId != null)
+              .map((l: any) => ({
+                round_id: Number(l.roundId),
+                motherlode_running: motherlodeTotal, // Use current value for all rounds
+              }))
           : [],
       };
     }
