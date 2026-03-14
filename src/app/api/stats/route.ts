@@ -153,5 +153,5 @@ export async function GET() {
     data.motherlodeHistory = motherlodeHistory;
   }
 
-  return Response.json(data);
+  return Response.json({...data, _ts: Date.now()});
 }
