@@ -31,8 +31,8 @@ function normalizeUpstreamResponse(raw: any): DbStatsData | null {
           WINNER_TAKE_ALL: Number(pie?.winnerTakeAll) || 0,
           SPLIT_EVENLY: Number(pie?.split) || 0,
         },
-        // NOTE: Historical motherlode data not available from upstream API.
-        // Returning empty array. History will be built going forward as new rounds arrive.
+        // NOTE: Historical motherlode data comes from motherlode_snapshots table.
+        // For now, returning empty array until cron populates it.
         motherlodeHistory: [],
       };
     }

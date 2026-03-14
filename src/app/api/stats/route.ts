@@ -1,7 +1,42 @@
 import { getDbStatsData } from '@/app/lib/db-stats';
 import type { DbStatsData } from '@/app/lib/db-stats';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
+
+async function fetchMotherlodeHistory(): Promise<Array<{round_id: number, motherlode_running: number}>> {
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn('[fetchMotherlodeHistory] Supabase credentials not available');
+      return [];
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const { data, error } = await supabase
+      .from('motherlode_snapshots')
+      .select('round_id, motherlode_value')
+      .order('round_id', { ascending: true });
+
+    if (error) {
+      console.warn('[fetchMotherlodeHistory] Query error:', error.message);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      round_id: Number(row.round_id),
+      motherlode_running: Number(row.motherlode_value),
+    }));
+  } catch (err) {
+    console.error('[fetchMotherlodeHistory] Error:', err instanceof Error ? err.message : String(err));
+    return [];
+  }
+}
 
 const UPSTREAM_BASE = 'https://api.rore.supply';
 
@@ -111,6 +146,12 @@ export async function GET() {
       { error: 'Failed to load stats data from all sources' },
       { status: 500 }
     );
+  }
+
+  // Always try to fetch motherlode history from Supabase snapshots table
+  const motherlodeHistory = await fetchMotherlodeHistory();
+  if (motherlodeHistory.length > 0) {
+    data.motherlodeHistory = motherlodeHistory;
   }
 
   return Response.json(data);
