@@ -9,25 +9,34 @@ import {
   ChartOptions
 } from 'chart.js';
 import { useEffect, useState } from 'react';
-import { getDbStatsData } from '../lib/db-stats';
+import { getDbStatsData, DbStatsData } from '../lib/db-stats';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function WinnerTypesPie() {
-  const [data, setData] = useState<{
-    winnerTypesDistribution: { WINNER_TAKE_ALL: number; SPLIT_EVENLY: number };
-  } | null>(null);
+interface WinnerTypesPieProps {
+  data?: DbStatsData | null;
+}
+
+export default function WinnerTypesPie({ data: propData }: WinnerTypesPieProps) {
+  const [internalData, setInternalData] = useState<DbStatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Use prop data if provided, otherwise fetch
+  const data = propData !== undefined ? propData : internalData;
+
   useEffect(() => {
-    async function fetchData() {
-      const result = await getDbStatsData();
-      setData(result);
+    if (propData === undefined) {
+      async function fetchData() {
+        const result = await getDbStatsData();
+        setInternalData(result);
+        setLoading(false);
+      }
+      fetchData();
+    } else {
       setLoading(false);
     }
-    fetchData();
-  }, []);
+  }, [propData]);
 
   if (loading) {
     return (

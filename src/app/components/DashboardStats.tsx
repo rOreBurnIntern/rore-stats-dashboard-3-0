@@ -1,8 +1,12 @@
 import StatCard from './StatCard';
-import { getDbStatsData } from '../lib/db-stats';
+import { getDbStatsData, DbStatsData } from '../lib/db-stats';
 
-export default async function DashboardStats() {
-  const data = await getDbStatsData();
+interface DashboardStatsProps {
+  data?: DbStatsData | null;
+}
+
+export default async function DashboardStats({ data: propData }: DashboardStatsProps) {
+  const data = propData !== undefined ? propData : await getDbStatsData();
 
   if (!data) {
     return (

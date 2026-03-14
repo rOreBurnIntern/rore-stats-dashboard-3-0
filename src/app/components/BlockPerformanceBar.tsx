@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { getDbStatsData } from '../lib/db-stats';
+import { getDbStatsData, DbStatsData } from '../lib/db-stats';
 
 // Register Chart.js components
 ChartJS.register(
@@ -23,15 +23,19 @@ ChartJS.register(
   Legend
 );
 
-export default function BlockPerformanceBar() {
-  const [data, setData] = useState<any>(null);
+interface BlockPerformanceBarProps {
+  data?: DbStatsData | null;
+}
+
+export default function BlockPerformanceBar({ data: propData }: BlockPerformanceBarProps) {
+  const [chartData, setChartData] = useState<{ chartData: any; options: any } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const result = await getDbStatsData();
+        const result = propData !== undefined ? propData : await getDbStatsData();
         if (!result) {
           setError('Failed to load data');
           setLoading(false);
@@ -47,7 +51,7 @@ export default function BlockPerformanceBar() {
         // Sort by block number to ensure correct order
         const sortedData = [...blockPerformance].sort((a, b) => a.block - b.block);
 
-        const chartData = {
+        const chartDataConfig = {
           labels: sortedData.map((entry: any) => entry.block.toString()),
           datasets: [
             {
@@ -149,7 +153,7 @@ export default function BlockPerformanceBar() {
           },
         };
 
-        setData({ chartData, options });
+        setChartData({ chartData: chartDataConfig, options });
         setLoading(false);
       } catch (err) {
         console.error('Error loading BlockPerformanceBar data:', err);
@@ -159,7 +163,7 @@ export default function BlockPerformanceBar() {
     }
 
     fetchData();
-  }, []);
+  }, [propData]);
 
   if (loading) {
     return (
@@ -181,7 +185,7 @@ export default function BlockPerformanceBar() {
     );
   }
 
-  if (!data) {
+  if (!chartData) {
     return (
       <div className="w-full p-4 border rounded-lg shadow bg-white">
         <div className="flex items-center justify-center h-64">
@@ -193,7 +197,7 @@ export default function BlockPerformanceBar() {
 
   return (
     <div className="w-full p-4 border rounded-lg shadow bg-white">
-      <Bar data={data.chartData} options={data.options} />
+      <Bar data={chartData.chartData} options={chartData.options} />
     </div>
   );
 }
