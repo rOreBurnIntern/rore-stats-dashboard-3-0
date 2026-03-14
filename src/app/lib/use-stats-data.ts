@@ -36,10 +36,29 @@ function normalizeUpstreamResponse(raw: any): DbStatsData | null {
           SPLIT_EVENLY: Number(pie?.split) || 0,
         },
         motherlodeHistory: Array.isArray(line)
-          ? line.map((l: any) => ({
-              round_id: Number(l.roundId),
-              motherlode_running: Number(l.motherlodeValue),
-            }))
+          ? (() => {
+              // If line has motherlodeValue, check if it's incremental and compute cumulative sum
+              const values = line.map((l: any) => Number(l.motherlodeValue) || 0);
+              const isCumulative = values.length > 1 && values[values.length - 1] < 100; // Heuristic: if last value < 100, likely incremental
+              
+              if (isCumulative && values.length > 0) {
+                // Compute cumulative sum
+                let cumSum = 0;
+                return line.map((l: any, idx: number) => {
+                  cumSum += values[idx];
+                  return {
+                    round_id: Number(l.roundId),
+                    motherlode_running: cumSum,
+                  };
+                });
+              } else {
+                // Use values as-is
+                return line.map((l: any) => ({
+                  round_id: Number(l.roundId),
+                  motherlode_running: Number(l.motherlodeValue),
+                }));
+              }
+            })()
           : [],
       };
     }

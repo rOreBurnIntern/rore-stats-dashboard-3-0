@@ -63,7 +63,7 @@ export default function MotherlodeLineChart({ data: propData }: MotherlodeLineCh
     labels: data.motherlodeHistory.map((m: any) => m.round_id.toString()),
     datasets: [
       {
-        label: 'Motherlode (WETH)',
+        label: 'Motherlode (rORE)',
         data: data.motherlodeHistory.map((m: any) => m.motherlode_running),
         borderColor: '#ffb15c',
         backgroundColor: 'rgba(255, 177, 92, 0.1)',
@@ -93,7 +93,7 @@ export default function MotherlodeLineChart({ data: propData }: MotherlodeLineCh
           label: (context: any) => {
             const raw = context?.raw;
             const val = typeof raw === 'number' ? raw : Number(raw) || 0;
-            return `Motherlode: ${val.toFixed(2)} WETH`;
+            return `Motherlode: ${val.toFixed(2)} rORE`;
           },
           title: (context: any) => `Round ${context?.[0]?.label ?? ''}`,
         }
@@ -101,7 +101,7 @@ export default function MotherlodeLineChart({ data: propData }: MotherlodeLineCh
       legend: { display: true, position: 'top' }
     },
     scales: {
-      y: { title: { display: true, text: 'Motherlode (WETH)' } },
+      y: { title: { display: true, text: 'Motherlode (rORE)' } },
       x: { title: { display: true, text: 'Round ID' } }
     }
   };
