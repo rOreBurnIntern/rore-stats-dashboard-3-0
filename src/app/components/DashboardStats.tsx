@@ -33,26 +33,32 @@ export default function DashboardStats({ data: propData }: DashboardStatsProps) 
 
   const { currentPrice, motherlodeTotal, totalORELocked } = data;
 
+  // Defensive: guard against null/undefined numeric fields
+  const wethPrice = typeof currentPrice?.WETH === 'number' ? currentPrice.WETH : 0;
+  const rorePrice = typeof currentPrice?.rORE === 'number' ? currentPrice.rORE : 0;
+  const motherlode = typeof motherlodeTotal === 'number' ? motherlodeTotal : 0;
+  const oreLocked = typeof totalORELocked === 'number' ? totalORELocked : 0;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
       <StatCard
         label="WETH Price"
-        value={currentPrice.WETH.toFixed(2)}
+        value={wethPrice.toFixed(2)}
         unit="USD"
       />
       <StatCard
         label="rORE Price"
-        value={currentPrice.rORE.toFixed(4)}
+        value={rorePrice.toFixed(4)}
         unit="USD"
       />
       <StatCard
         label="Motherlode Total"
-        value={motherlodeTotal.toFixed(2)}
+        value={motherlode.toFixed(2)}
         unit="WETH"
       />
       <StatCard
         label="Total rORE Locked"
-        value={totalORELocked.toFixed(2)}
+        value={oreLocked.toFixed(2)}
         unit="rORE"
       />
     </div>

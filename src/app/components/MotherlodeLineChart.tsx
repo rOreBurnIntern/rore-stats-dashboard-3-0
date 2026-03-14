@@ -90,8 +90,12 @@ export default function MotherlodeLineChart({ data: propData }: MotherlodeLineCh
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => `Motherlode: ${context.raw.toFixed(2)} WETH`,
-          title: (context: any) => `Round ${context[0].label}`
+          label: (context: any) => {
+            const raw = context?.raw;
+            const val = typeof raw === 'number' ? raw : Number(raw) || 0;
+            return `Motherlode: ${val.toFixed(2)} WETH`;
+          },
+          title: (context: any) => `Round ${context?.[0]?.label ?? ''}`,
         }
       },
       legend: { display: true, position: 'top' }

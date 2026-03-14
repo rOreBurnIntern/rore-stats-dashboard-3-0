@@ -37,7 +37,9 @@ export default function WinnerTypesPie({ data: propData }: WinnerTypesPieProps) 
     );
   }
 
-  const { WINNER_TAKE_ALL, SPLIT_EVENLY } = data.winnerTypesDistribution;
+  const dist = data.winnerTypesDistribution ?? { WINNER_TAKE_ALL: 0, SPLIT_EVENLY: 0 };
+  const WINNER_TAKE_ALL = typeof dist.WINNER_TAKE_ALL === 'number' ? dist.WINNER_TAKE_ALL : 0;
+  const SPLIT_EVENLY = typeof dist.SPLIT_EVENLY === 'number' ? dist.SPLIT_EVENLY : 0;
   const total = WINNER_TAKE_ALL + SPLIT_EVENLY;
 
   const chartData = {
@@ -70,8 +72,8 @@ export default function WinnerTypesPie({ data: propData }: WinnerTypesPieProps) 
       tooltip: {
         callbacks: {
           label: (context) => {
-            const value = context.raw as number;
-            const percentage = ((value / total) * 100).toFixed(1);
+            const value = (context.raw as number) ?? 0;
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
             return `${context.label}: ${value} (${percentage}%)`;
           }
         },

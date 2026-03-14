@@ -110,8 +110,8 @@ export default function BlockPerformanceBar({ data: propData }: BlockPerformance
         enabled: true,
         callbacks: {
           label: function(context: any) {
-            const block = context.chart.data.labels[context.dataIndex];
-            const winCount = context.parsed.y;
+            const block = context?.chart?.data?.labels?.[context.dataIndex] ?? context.dataIndex;
+            const winCount = context?.parsed?.y ?? 0;
             return [
               `Block ${block}`,
               `Wins: ${winCount}`,
