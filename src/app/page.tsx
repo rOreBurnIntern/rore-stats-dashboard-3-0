@@ -1,7 +1,11 @@
+'use client';
+
 import DashboardStats from './components/DashboardStats';
 import WinnerTypesPie from './components/WinnerTypesPie';
 import BlockPerformanceBar from './components/BlockPerformanceBar';
 import MotherlodeLineChart from './components/MotherlodeLineChart';
+
+export const dynamic = 'force-dynamic';
 
 export default function Home() {
   return (
